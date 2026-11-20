@@ -1,0 +1,79 @@
+   0.039s  [NODE] intake done
+   0.059s  > supervisor started
+   1.635s      [LLM 1] 1.571s, in 1,947 / out 180 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process trees, command lines, and network connections for the alert since there are no files involved.\...)
+                  action:  log_network_analyst({"request": "Investigate process trees, command lines, and network connections for WS-HR-08 related to svchost.exe running from an unusual folder. Look for pare...)
+   1.637s      [TOOL] record_plan: success (0.001s)
+   1.681s      > log_network_analyst started
+   3.048s          [LLM 2] 1.362s, in 1,574 / out 143 tokens
+                      action:  record_plan("{\"plan\": \"1. Get activity overview and analyze process tree to check for svchost.exe running from unusual folders and parent-child relationships.\\n2. Summa...)
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   3.050s          [TOOL] record_plan: success (0.001s)
+   3.052s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+   3.053s          [TOOL] analyze_process_tree: success -> evidence LN-2 (0.001s)
+   3.054s          [TOOL] summarize_network: success -> evidence LN-3, LN-4 (0.001s)
+   3.056s          [TOOL] check_beaconing: success -> evidence LN-5 (0.001s)
+   3.057s          [TOOL] analyze_dns: no_dns (0.001s)
+  30.445s          [WAIT] 27.37s to stay under the requests-per-minute limit
+  31.386s          [LLM 3] 0.941s, in 2,527 / out 17 tokens
+                      action:  lookup_process({"pid": 6600})
+  31.389s          [TOOL] lookup_process: success -> evidence LN-6 (0.001s)
+  32.190s          [WAIT] 0.79s to stay under the requests-per-minute limit
+  34.225s          [LLM 4] 2.034s, in 2,712 / out 448 tokens
+                      action:  set_model_response("{\"summary\": \"Investigation of host WS-HR-08 revealed malicious masquerading where a renamed or copied svchost.exe binary executing from C:\\\\Users\\\\Publi...)
+  34.227s          [TOOL] set_model_response: returned findings (0.001s)
+  34.229s      < log_network_analyst finished
+  34.230s      [TOOL] log_network_analyst: returned findings (32.593s)
+  35.781s      [WAIT] 1.54s to stay under the requests-per-minute limit
+  36.461s      [LLM 5] 0.679s, in 3,098 / out 115 tokens
+                  action:  threat_intel_analyst("{\"request\": \"Map the findings from log_network_analyst (masquerading as svchost.exe from C:\\\\Users\\\\Public, outbound network connections on port 8443, a...)
+  36.494s      > threat_intel_analyst started
+  37.786s          [WAIT] 1.29s to stay under the requests-per-minute limit
+  39.063s          [LLM 6] 1.277s, in 2,257 / out 87 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Look up technique hints from specialist findings and check indicator/host history. 3. Confirm techniques via get_technique and submit final response via set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  39.065s          [TOOL] record_plan: success (0.0s)
+  39.066s          [TOOL] get_specialist_findings: success (0.0s)
+  39.067s          [TOOL] get_alert_indicators: success (0.001s)
+  39.558s          [WAIT] 0.47s to stay under the requests-per-minute limit
+  40.397s          [LLM 7] 0.839s, in 3,408 / out 140 tokens
+                      action:  get_technique({"technique_id": "T1036.005"})
+                      action:  get_technique({"technique_id": "T1071.001"})
+                      action:  get_technique({"technique_id": "T1571"})
+                      action:  check_indicator_history({"value": "203.0.113.99", "indicator_type": "ip"})
+                      action:  check_host_history({"host": "WS-HR-08"})
+  40.399s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  40.400s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  40.400s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+  40.402s          [TOOL] check_indicator_history: success (0.001s)
+  40.403s          [TOOL] check_host_history: success (0.001s)
+  42.762s          [WAIT] 2.34s to stay under the requests-per-minute limit
+  44.489s          [LLM 8] 1.727s, in 4,197 / out 484 tokens
+                      action:  set_model_response("{\"agent\": \"threat_intel_analyst\", \"gaps\": [\"No previous alerts found for IP 203.0.113.99 or host WS-HR-08; file hash for C:\\\\Users\\\\Public\\\\svchos...)
+  44.491s          [TOOL] set_model_response: returned findings (0.001s)
+  44.493s      < threat_intel_analyst finished
+  44.493s      [TOOL] threat_intel_analyst: returned findings (8.032s)
+  45.084s      [WAIT] 0.58s to stay under the requests-per-minute limit
+  47.083s      [LLM 9] 2.0s, in 4,338 / out 819 tokens
+                  action:  set_model_response("{\"preliminary_severity\": \"high\", \"delegations\": [{\"brief\": \"Investigate process trees, command lines, and network connections for WS-HR-08 related to ...)
+  47.085s      [TOOL] set_model_response: None (0.0s)
+  47.087s  < supervisor finished
+  47.116s  [ROUTE] check_findings -> OK
+  47.136s  > report_writer started
+  47.505s      [WAIT] 0.36s to stay under the requests-per-minute limit
+  50.132s      [LLM 10] 2.627s, in 2,178 / out 777 tokens
+                  text:    { "alert_id": "EVAL-10", "severity": "high", "summary": "Host WS-HR-08 shows active command-and-control beaconing from an unauthorized process running a system binary name out of a user-writable directory.", "claims": [ ...
+  50.134s  < report_writer finished
+  50.159s  [CHECK] check_report: 0 issue(s)
+  50.180s  > critic started
+  50.377s      [WAIT] 0.19s to stay under the requests-per-minute limit
+  51.570s      [LLM 11] 1.192s, in 1,815 / out 11 tokens
+                  text:    { "verdict": "approve" }
+  51.571s  < critic finished
+  51.607s  [ROUTE] route_after_critic -> FINAL
+  51.645s  [NODE] finalize done

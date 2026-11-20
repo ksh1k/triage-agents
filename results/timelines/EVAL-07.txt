@@ -1,0 +1,78 @@
+   0.040s  [NODE] intake done
+   0.060s  > supervisor started
+   1.413s      [LLM 1] 1.348s, in 1,938 / out 207 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to analyze process trees, command lines, network connections, and DNS query logs for host WS-ENG-21 related to the bur...)
+                  action:  log_network_analyst("{\"request\": \"Analyze the process trees, command lines, network connections, and DNS query logs for host WS-ENG-21. Investigate the burst of 9 failed DNS loo...)
+   1.414s      [TOOL] record_plan: success (0.0s)
+   1.446s      > log_network_analyst started
+   2.861s          [LLM 2] 1.412s, in 1,585 / out 112 tokens
+                      plan:    1. Get activity overview and analyze process tree, network connections, beaconing, and DNS. 2. Lookup specific processes if needed. 3. Submit structured findings via set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   2.863s          [TOOL] record_plan: success (0.001s)
+   2.864s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+   2.865s          [TOOL] analyze_process_tree: success -> evidence LN-2 (0.001s)
+   2.866s          [TOOL] summarize_network: success -> evidence LN-3 (0.001s)
+   2.867s          [TOOL] check_beaconing: success -> evidence LN-4 (0.001s)
+   2.868s          [TOOL] analyze_dns: success -> evidence LN-5, LN-6, LN-7 (0.001s)
+   3.458s          [LLM 3] 0.58s, in 2,590 / out 17 tokens
+                      action:  lookup_process({"pid": 9100})
+   3.460s          [TOOL] lookup_process: success -> evidence LN-8 (0.001s)
+   5.108s          [LLM 4] 1.639s, in 2,785 / out 490 tokens
+                      action:  set_model_response("{\"gaps\": [\"Full memory dump or packet capture contents of the TLS session (destination 198.51.100.77:443) to confirm C2 protocol.\"], \"benign_explanations\...)
+   5.110s          [TOOL] set_model_response: returned findings (0.001s)
+   5.112s      < log_network_analyst finished
+   5.113s      [TOOL] log_network_analyst: returned findings (3.698s)
+  35.717s      [WAIT] 30.59s to stay under the requests-per-minute limit
+  36.329s      [LLM 5] 0.611s, in 3,264 / out 91 tokens
+                  action:  threat_intel_analyst({"request": "Map the findings from log_network_analyst (updsvc.exe in AppData Temp executing DGA-like DNS queries and external C2 communication on 198.51.100.77...)
+  36.358s      > threat_intel_analyst started
+  37.467s          [WAIT] 1.1s to stay under the requests-per-minute limit
+  38.921s          [LLM 6] 1.453s, in 2,233 / out 77 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Check technique validity for hints and check indicator/host history. 3. Submit final assessment via set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  38.922s          [TOOL] record_plan: success (0.0s)
+  38.923s          [TOOL] get_specialist_findings: success (0.0s)
+  38.924s          [TOOL] get_alert_indicators: success (0.001s)
+  41.065s          [WAIT] 2.13s to stay under the requests-per-minute limit
+  42.130s          [LLM 7] 1.064s, in 3,688 / out 195 tokens
+                      action:  get_technique({"technique_id": "T1568.002"})
+                      action:  get_technique({"technique_id": "T1071.001"})
+                      action:  get_technique({"technique_id": "T1543"})
+                      action:  get_technique({"technique_id": "T1102"})
+                      action:  check_indicator_history({"indicator_type": "filename", "value": "updsvc.exe"})
+                      action:  check_indicator_history({"indicator_type": "ip", "value": "198.51.100.77"})
+                      action:  check_host_history({"host": "WS-ENG-21"})
+  42.131s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  42.132s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  42.133s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+  42.133s          [TOOL] get_technique: success -> evidence TI-4 (0.0s)
+  42.135s          [TOOL] check_indicator_history: success (0.001s)
+  42.145s          [TOOL] check_indicator_history: success (0.001s)
+  42.147s          [TOOL] check_host_history: success (0.001s)
+  43.064s          [WAIT] 0.9s to stay under the requests-per-minute limit
+  44.811s          [LLM 8] 1.747s, in 4,773 / out 604 tokens
+                      action:  set_model_response("{\"rejected_hints\": [{\"description\": \"T1102 (Web Service) is rejected because the connections are to an arbitrary external IP address (198.51.100.77) rathe...)
+  44.813s          [TOOL] set_model_response: returned findings (0.001s)
+  44.815s      < threat_intel_analyst finished
+  44.816s      [TOOL] threat_intel_analyst: returned findings (8.486s)
+  47.273s      [LLM 9] 2.447s, in 4,751 / out 1,003 tokens
+                  action:  set_model_response("{\"delegations\": [{\"called\": true, \"agent\": \"log_network_analyst\", \"brief\": \"Analyze the process trees, command lines, network connections, and DNS q...)
+  47.274s      [TOOL] set_model_response: None (0.0s)
+  47.278s  < supervisor finished
+  47.305s  [ROUTE] check_findings -> OK
+  47.326s  > report_writer started
+  50.312s      [LLM 10] 2.986s, in 2,499 / out 849 tokens
+                  text:    { "alert_id": "EVAL-07", "severity": "high", "summary": "Host WS-ENG-21 exhibited suspicious malware execution behavior: an unauthorized executable (updsvc.exe) ran from a user AppData Temp directory, generated a burst o...
+  50.314s  < report_writer finished
+  50.347s  [CHECK] check_report: 0 issue(s)
+  50.369s  > critic started
+  51.640s      [LLM 11] 1.27s, in 2,017 / out 12 tokens
+                  text:    { "verdict": "approve" }
+  51.641s  < critic finished
+  51.671s  [ROUTE] route_after_critic -> FINAL
+  51.703s  [NODE] finalize done

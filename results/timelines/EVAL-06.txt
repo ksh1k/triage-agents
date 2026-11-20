@@ -1,0 +1,82 @@
+   0.041s  [NODE] intake done
+   0.063s  > supervisor started
+   1.568s      [LLM 1] 1.5s, in 1,944 / out 165 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process execution, command lines, network connections, and process tree for certutil.exe activity on WS...)
+                  action:  log_network_analyst({"request": "Investigate process events and network connections for certutil.exe on host WS-MKT-09, focusing on command lines, parent-child process relationship...)
+   1.569s      [TOOL] record_plan: success (0.0s)
+   1.597s      > log_network_analyst started
+  32.628s          [WAIT] 31.02s to stay under the requests-per-minute limit
+  34.012s          [LLM 2] 1.384s, in 1,557 / out 117 tokens
+                      plan:    1. Get activity overview and analyze process tree, network, beaconing, and DNS. 2. Lookup specific PIDs related to certutil.exe if needed. 3. Submit findings using set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+  34.013s          [TOOL] record_plan: success (0.0s)
+  34.014s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+  34.016s          [TOOL] analyze_process_tree: success -> evidence LN-2, LN-3 (0.001s)
+  34.017s          [TOOL] summarize_network: success -> evidence LN-4 (0.001s)
+  34.018s          [TOOL] check_beaconing: success -> evidence LN-5 (0.001s)
+  34.018s          [TOOL] analyze_dns: no_dns (0.0s)
+  34.374s          [WAIT] 0.34s to stay under the requests-per-minute limit
+  35.062s          [LLM 3] 0.687s, in 2,499 / out 51 tokens
+                      action:  lookup_process({"pid": 8110})
+                      action:  lookup_process({"pid": 8120})
+                      action:  lookup_process({"pid": 8130})
+  35.064s          [TOOL] lookup_process: success -> evidence LN-6 (0.001s)
+  35.066s          [TOOL] lookup_process: success -> evidence LN-7 (0.001s)
+  35.067s          [TOOL] lookup_process: success -> evidence LN-8 (0.001s)
+  37.973s          [WAIT] 2.89s to stay under the requests-per-minute limit
+  39.950s          [LLM 4] 1.977s, in 3,053 / out 593 tokens
+                      action:  set_model_response("{\"benign_explanations\": [\"Certutil is a legitimate Windows utility often used by administrators for certificate services, but its misuse for download and de...)
+  39.952s          [TOOL] set_model_response: returned findings (0.001s)
+  39.954s      < log_network_analyst finished
+  39.955s      [TOOL] log_network_analyst: returned findings (38.385s)
+  40.802s      [LLM 5] 0.836s, in 3,387 / out 64 tokens
+                  action:  threat_intel_analyst({"request": "Map the findings from log_network_analyst (certutil download via urlcache from external IP, decoding file, execution of payload from public directo...)
+  40.835s      > threat_intel_analyst started
+  42.068s          [LLM 6] 1.227s, in 2,206 / out 79 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Get techniques for hints provided by specialists and check indicator/host history. 3. Submit final response via set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  42.070s          [TOOL] record_plan: success (0.0s)
+  42.070s          [TOOL] get_specialist_findings: success (0.001s)
+  42.071s          [TOOL] get_alert_indicators: success (0.001s)
+  43.066s          [LLM 7] 0.984s, in 3,655 / out 159 tokens
+                      action:  get_technique({"technique_id": "T1105"})
+                      action:  get_technique({"technique_id": "T1140"})
+                      action:  get_technique({"technique_id": "T1204"})
+                      action:  check_indicator_history({"value": "192.0.2.44", "indicator_type": "ip"})
+                      action:  check_indicator_history({"indicator_type": "filename", "value": "a.exe"})
+                      action:  check_host_history({"host": "WS-MKT-09"})
+  43.068s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  43.068s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  43.069s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+  43.069s          [TOOL] check_indicator_history: success -> evidence TI-4 (0.0s)
+  43.070s          [TOOL] check_indicator_history: success (0.0s)
+  43.070s          [TOOL] check_host_history: success (0.0s)
+  45.209s          [WAIT] 2.13s to stay under the requests-per-minute limit
+  46.749s          [LLM 8] 1.54s, in 4,569 / out 415 tokens
+                      action:  set_model_response("{\"rejected_hints\": [], \"agent\": \"threat_intel_analyst\", \"history\": [{\"signal\": \"strong\", \"evidence_ids\": [\"TI-4\"], \"description\": \"Indicator...)
+  46.751s          [TOOL] set_model_response: returned findings (0.001s)
+  46.753s      < threat_intel_analyst finished
+  46.754s      [TOOL] threat_intel_analyst: returned findings (5.951s)
+  49.481s      [WAIT] 2.71s to stay under the requests-per-minute limit
+  51.769s      [LLM 9] 2.287s, in 4,713 / out 836 tokens
+                  action:  set_model_response("{\"severity_rationale\": \"The alert demonstrates active compromise involving Living-off-the-Land Binaries (LotL) where certutil.exe was used to download a pay...)
+  51.770s      [TOOL] set_model_response: None (0.0s)
+  51.773s  < supervisor finished
+  51.805s  [ROUTE] check_findings -> OK
+  51.826s  > report_writer started
+  52.427s      [WAIT] 0.59s to stay under the requests-per-minute limit
+  55.494s      [LLM 10] 3.066s, in 2,363 / out 955 tokens
+                  text:    { "alert_id": "EVAL-06", "severity": "critical", "summary": "Host WS-MKT-09 experienced an active compromise where cmd.exe spawned certutil.exe to download an external file from 192.0.2.44 into C:\\Users\\Public\\a.txt, ...
+  55.496s  < report_writer finished
+  55.527s  [CHECK] check_report: 0 issue(s)
+  55.548s  > critic started
+  56.730s      [LLM 11] 1.181s, in 2,186 / out 12 tokens
+                  text:    { "verdict": "approve" }
+  56.731s  < critic finished
+  56.764s  [ROUTE] route_after_critic -> FINAL
+  56.784s  [NODE] finalize done

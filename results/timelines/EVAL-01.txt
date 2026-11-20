@@ -1,0 +1,84 @@
+   0.071s  [NODE] intake done
+   0.097s  > supervisor started
+   1.880s      [LLM 1] 1.708s, in 1,940 / out 177 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process trees, command lines, network connections, and DNS queries for alert EVAL-01.\\n2. Skip static_...)
+                  action:  log_network_analyst({"request": "Examine process trees, command lines, network connections, and DNS queries for alert EVAL-01 (Office application spawned PowerShell on host WS-ACC-...)
+   1.881s      [TOOL] record_plan: success (0.0s)
+   1.912s      > log_network_analyst started
+   3.406s          [LLM 2] 1.483s, in 1,574 / out 145 tokens
+                      action:  record_plan("{\"plan\": \"1. Run get_activity_overview, analyze_process_tree, summarize_network, check_beaconing, and analyze_dns to gather initial alert data.\\n2. Inspect...)
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   3.417s          [TOOL] record_plan: success (0.001s)
+   3.418s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+   3.424s          [TOOL] analyze_process_tree: success -> evidence LN-2, LN-3, LN-4, LN-5, LN-6 (0.006s)
+   3.425s          [TOOL] summarize_network: success -> evidence LN-7 (0.001s)
+   3.426s          [TOOL] check_beaconing: success -> evidence LN-8 (0.0s)
+   3.427s          [TOOL] analyze_dns: success -> evidence LN-9 (0.001s)
+   4.537s          [LLM 3] 1.101s, in 3,553 / out 17 tokens
+                      action:  lookup_process({"pid": 3300})
+   4.539s          [TOOL] lookup_process: success -> evidence LN-10 (0.001s)
+   6.144s          [LLM 4] 1.596s, in 3,878 / out 441 tokens
+                      action:  set_model_response("{\"summary\": \"Analysis of host WS-ACC-14 for alert EVAL-01 reveals clear malicious activity: Microsoft Word opened an email/downloaded document (invoice_2211...)
+   6.146s          [TOOL] set_model_response: returned findings (0.001s)
+   6.148s      < log_network_analyst finished
+   6.149s      [TOOL] log_network_analyst: returned findings (4.266s)
+   6.853s      [LLM 5] 0.692s, in 3,679 / out 84 tokens
+                  action:  threat_intel_analyst({"request": "Map the findings from log_network_analyst (WINWORD.EXE spawning hidden base64-encoded PowerShell executing a web download cradle via IEX Net.WebCli...)
+   6.886s      > threat_intel_analyst started
+   8.052s          [LLM 6] 1.156s, in 2,226 / out 77 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Get techniques for hints provided and check indicator/host history. 3. Submit final assessment via set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+   8.054s          [TOOL] record_plan: success (0.0s)
+   8.055s          [TOOL] get_specialist_findings: success (0.001s)
+   8.056s          [TOOL] get_alert_indicators: success (0.001s)
+   8.959s          [LLM 7] 0.893s, in 3,982 / out 200 tokens
+                      action:  get_technique({"technique_id": "T1059.001"})
+                      action:  get_technique({"technique_id": "T1105"})
+                      action:  get_technique({"technique_id": "T1204.002"})
+                      action:  get_technique({"technique_id": "T1564.003"})
+                      action:  check_indicator_history({"indicator_type": "ip", "value": "203.0.113.50"})
+                      action:  check_indicator_history({"indicator_type": "domain", "value": "update.invalid-cdn.example"})
+                      action:  check_host_history({"host": "WS-ACC-14"})
+   8.990s          [TOOL] get_technique: success -> evidence TI-1 (0.029s)
+   8.990s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+   8.991s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+   8.991s          [TOOL] get_technique: success -> evidence TI-4 (0.0s)
+   8.994s          [TOOL] check_indicator_history: success -> evidence TI-5 (0.003s)
+   8.995s          [TOOL] check_indicator_history: success -> evidence TI-6 (0.001s)
+   8.996s          [TOOL] check_host_history: success (0.001s)
+  10.473s          [LLM 8] 1.468s, in 5,196 / out 534 tokens
+                      action:  set_model_response("{\"history\": [{\"signal\": \"strong\", \"description\": \"External IP address 203.0.113.50 was seen in past true positive alert PA-2026-1003 (Invoice-themed p...)
+  10.474s          [TOOL] set_model_response: returned findings (0.0s)
+  10.476s      < threat_intel_analyst finished
+  10.476s      [TOOL] threat_intel_analyst: returned findings (3.622s)
+  13.936s      [LLM 9] 3.453s, in 5,686 / out 919 tokens
+                  action:  set_model_response("{\"alert_id\": \"EVAL-01\", \"history\": [{\"description\": \"External IP address 203.0.113.50 was seen in past true positive alert PA-2026-1003 (Invoice-theme...)
+  13.938s      [TOOL] set_model_response: None (0.001s)
+  13.940s  < supervisor finished
+  13.972s  [ROUTE] check_findings -> OK
+  13.993s  > report_writer started
+  17.213s      [LLM 10] 3.219s, in 2,982 / out 964 tokens
+                  text:    { "alert_id": "EVAL-01", "severity": "critical", "summary": "An invoice-themed Word document launched hidden, base64-encoded PowerShell on host WS-ACC-14 to download and execute an external script from an IP address prev...
+  17.215s  < report_writer finished
+  17.254s  [CHECK] check_report: 1 issue(s) (unsupported_technique)
+  17.276s  > critic started
+  18.606s      [LLM 11] 1.329s, in 2,728 / out 64 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "unsupported_technique", "detail": "Technique T1204.002 cites no behavior evidence (SA- or LN-)." } ] }
+  18.608s  < critic finished
+  18.638s  [ROUTE] route_after_critic -> REVISE (revision 1)
+  18.665s  > report_writer started
+  21.251s      [LLM 12] 2.585s, in 4,022 / out 957 tokens
+                  text:    { "alert_id": "EVAL-01", "severity": "critical", "summary": "An invoice-themed Word document launched hidden, base64-encoded PowerShell on host WS-ACC-14 to download and execute an external script from an IP address prev...
+  21.253s  < report_writer finished
+  21.284s  [CHECK] check_report: 0 issue(s)
+  21.305s  > critic started
+  21.922s      [LLM 13] 0.617s, in 2,705 / out 16 tokens
+                  text:    { "verdict": "approve", "issues": [] }
+  21.924s  < critic finished
+  21.951s  [ROUTE] route_after_critic -> FINAL
+  21.976s  [NODE] finalize done

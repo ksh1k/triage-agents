@@ -1,0 +1,347 @@
+{
+ "alert_id": "EVAL-10",
+ "model": "gemini-3.5-flash-lite",
+ "error": null,
+ "report": {
+  "alert_id": "EVAL-10",
+  "severity": "high",
+  "summary": "Host WS-HR-08 shows active command-and-control beaconing from an unauthorized process running a system binary name out of a user-writable directory.",
+  "claims": [
+   {
+    "text": "The alerting tool EDR reported that svchost.exe was running from an unusual folder on host WS-HR-08.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "An instance of svchost.exe (PID 6600) was executed from C:\\Users\\Public by explorer.exe (PID 2000) under user CORP\\rpatel with command line 'svchost.exe -k netsvcs'.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "The suspicious process established 14 external network connections to IP 203.0.113.99 on uncommon port 8443.",
+    "evidence_ids": [
+     "LN-3",
+     "LN-4",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "Beaconing analysis revealed machine-like regular connection intervals averaging approximately 120 seconds with a low coefficient of variation, indicating command-and-control activity.",
+    "evidence_ids": [
+     "LN-5"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1036.005",
+    "name": "Match Legitimate Resource Name or Location",
+    "tactic": "stealth",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6",
+     "TI-1"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1071.001",
+    "name": "Web Protocols",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-5",
+     "TI-2"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1571",
+    "name": "Non-Standard Port",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-3",
+     "LN-4",
+     "TI-3"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Isolate host WS-HR-08 from the network to prevent further command-and-control communication.",
+   "Terminate the malicious process running from C:\\Users\\Public (PID 6600).",
+   "Collect memory and disk artifacts from WS-HR-08 for forensic analysis.",
+   "Perform network hunts across the enterprise for outbound connections to IP 203.0.113.99 on port 8443.",
+   "Review execution logs for other hosts executing binaries from C:\\Users\\Public or other user-writable folders."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-HR-08: 'svchost.exe running from an unusual folder'. Description: 'Process with a system binary name outside System32 made network connections.'"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 6600 svchost.exe: svchost.exe running from c:\\users\\public instead of a Windows system folder; command line 'svchost.exe -k netsvcs'"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 6600 C:\\Users\\Public\\svchost.exe started by C:\\Windows\\explorer.exe (pid 2000) as user CORP\\rpatel; command line 'svchost.exe -k netsvcs'; 14 connections to 203.0.113.99:8443"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "external connection on uncommon port 8443: 203.0.113.99:8443 (None)"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "14 connections to 1 external destination(s): 203.0.113.99:8443 (no domain) x14 from pid [6600]"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "check_beaconing",
+    "summary": "likely_beacon: 14 connections to 203.0.113.99:8443 (None) every 120.16 s on average, interval CV 0.029, bytes-sent CV 0.012"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1036.005 'Match Legitimate Resource Name or Location' (tactics: stealth)"
+   },
+   {
+    "id": "TI-2",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1071.001 'Web Protocols' (tactics: command-and-control)"
+   },
+   {
+    "id": "TI-3",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1571 'Non-Standard Port' (tactics: command-and-control)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "report_without_critic": {
+  "alert_id": "EVAL-10",
+  "severity": "high",
+  "summary": "Host WS-HR-08 shows active command-and-control beaconing from an unauthorized process running a system binary name out of a user-writable directory.",
+  "claims": [
+   {
+    "text": "The alerting tool EDR reported that svchost.exe was running from an unusual folder on host WS-HR-08.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "An instance of svchost.exe (PID 6600) was executed from C:\\Users\\Public by explorer.exe (PID 2000) under user CORP\\rpatel with command line 'svchost.exe -k netsvcs'.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "The suspicious process established 14 external network connections to IP 203.0.113.99 on uncommon port 8443.",
+    "evidence_ids": [
+     "LN-3",
+     "LN-4",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "Beaconing analysis revealed machine-like regular connection intervals averaging approximately 120 seconds with a low coefficient of variation, indicating command-and-control activity.",
+    "evidence_ids": [
+     "LN-5"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1036.005",
+    "name": "Match Legitimate Resource Name or Location",
+    "tactic": "stealth",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6",
+     "TI-1"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1071.001",
+    "name": "Web Protocols",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-5",
+     "TI-2"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1571",
+    "name": "Non-Standard Port",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-3",
+     "LN-4",
+     "TI-3"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Isolate host WS-HR-08 from the network to prevent further command-and-control communication.",
+   "Terminate the malicious process running from C:\\Users\\Public (PID 6600).",
+   "Collect memory and disk artifacts from WS-HR-08 for forensic analysis.",
+   "Perform network hunts across the enterprise for outbound connections to IP 203.0.113.99 on port 8443.",
+   "Review execution logs for other hosts executing binaries from C:\\Users\\Public or other user-writable folders."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-HR-08: 'svchost.exe running from an unusual folder'. Description: 'Process with a system binary name outside System32 made network connections.'"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 6600 svchost.exe: svchost.exe running from c:\\users\\public instead of a Windows system folder; command line 'svchost.exe -k netsvcs'"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 6600 C:\\Users\\Public\\svchost.exe started by C:\\Windows\\explorer.exe (pid 2000) as user CORP\\rpatel; command line 'svchost.exe -k netsvcs'; 14 connections to 203.0.113.99:8443"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "external connection on uncommon port 8443: 203.0.113.99:8443 (None)"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "14 connections to 1 external destination(s): 203.0.113.99:8443 (no domain) x14 from pid [6600]"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "check_beaconing",
+    "summary": "likely_beacon: 14 connections to 203.0.113.99:8443 (None) every 120.16 s on average, interval CV 0.029, bytes-sent CV 0.012"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1036.005 'Match Legitimate Resource Name or Location' (tactics: stealth)"
+   },
+   {
+    "id": "TI-2",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1071.001 'Web Protocols' (tactics: command-and-control)"
+   },
+   {
+    "id": "TI-3",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1571 'Non-Standard Port' (tactics: command-and-control)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "check_issues_v0": [],
+ "final_issues": [],
+ "review_log": [
+  {
+   "round": 0,
+   "critic_verdict": "approve",
+   "critic_issues": 0,
+   "check_issues": 0
+  }
+ ],
+ "delegations": [
+  {
+   "agent": "log_network_analyst",
+   "called": true,
+   "brief": "Investigate process trees, command lines, and network connections for WS-HR-08 related to svchost.exe running from an unusual folder."
+  },
+  {
+   "agent": "static_analyst",
+   "called": false,
+   "brief": "Skip static analysis as no file is present in the alert."
+  },
+  {
+   "agent": "threat_intel_analyst",
+   "called": true,
+   "brief": "Map ATT&CK techniques and check past-alert history based on log_network_analyst findings."
+  }
+ ],
+ "ledger_ids": [
+  "AL-1",
+  "LN-1",
+  "LN-2",
+  "LN-3",
+  "LN-4",
+  "LN-5",
+  "LN-6",
+  "TI-1",
+  "TI-2",
+  "TI-3"
+ ],
+ "totals": {
+  "model_calls": 11,
+  "api_calls": 11,
+  "cached_calls": 0,
+  "tool_calls": 21,
+  "input_tokens": 30051,
+  "output_tokens": 3221,
+  "thinking_tokens": 0,
+  "total_tokens": 33272,
+  "estimated_cost_usd": 0.017067799999999998,
+  "wall_time_s": 51.645,
+  "rate_limit_wait_s": 34.93,
+  "errors": 0,
+  "agents": [
+   "intake",
+   "supervisor",
+   "log_network_analyst",
+   "threat_intel_analyst",
+   "check_findings",
+   "report_writer",
+   "check_report",
+   "critic",
+   "route_after_critic",
+   "finalize"
+  ]
+ },
+ "cost": {
+  "reflection_calls": 1,
+  "reflection_tokens": 1826,
+  "calls_by_agent": {
+   "supervisor": 3,
+   "log_network_analyst": 3,
+   "threat_intel_analyst": 3,
+   "report_writer": 1,
+   "critic": 1
+  }
+ }
+}

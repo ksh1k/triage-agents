@@ -1,0 +1,96 @@
+   0.044s  [NODE] intake done
+   0.064s  > supervisor started
+   1.667s      [WAIT] 1.59s to stay under the requests-per-minute limit
+   3.459s      [LLM 1] 1.792s, in 1,938 / out 134 tokens
+                  plan:    1. Call log_network_analyst to review process tree, command lines, and timing for EVAL-12. 2. Skip static_analyst as there is no file in the alert summary. 3. Call threat_intel_analyst after receiving log analysis. 4. Merge and finalize using set_model_response.
+                  action:  log_network_analyst({"request": "Analyze the process tree, command lines, and timing of the discovery commands executed on WS-IT-01 for alert EVAL-12."})
+   3.461s      [TOOL] record_plan: success (0.0s)
+   3.492s      > log_network_analyst started
+   5.062s          [LLM 2] 1.566s, in 1,544 / out 122 tokens
+                      plan:    1. Get activity overview and analyze process tree, network, beaconing, and DNS. 2. Look up specific PIDs if needed for discovery commands on WS-IT-01. 3. Submit findings via set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   5.063s          [TOOL] record_plan: success (0.0s)
+   5.064s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+   5.066s          [TOOL] analyze_process_tree: success -> evidence LN-2 (0.001s)
+   5.066s          [TOOL] summarize_network: no_connections (0.0s)
+   5.067s          [TOOL] check_beaconing: no_connections (0.0s)
+   5.068s          [TOOL] analyze_dns: no_dns (0.0s)
+   5.881s          [LLM 3] 0.803s, in 2,220 / out 68 tokens
+                      action:  lookup_process({"pid": 3500})
+                      action:  lookup_process({"pid": 3510})
+                      action:  lookup_process({"pid": 3520})
+                      action:  lookup_process({"pid": 3530})
+   5.883s          [TOOL] lookup_process: success -> evidence LN-3 (0.001s)
+   5.884s          [TOOL] lookup_process: success -> evidence LN-4 (0.001s)
+   5.885s          [TOOL] lookup_process: success -> evidence LN-5 (0.001s)
+   5.886s          [TOOL] lookup_process: success -> evidence LN-6 (0.001s)
+  33.588s          [WAIT] 27.68s to stay under the requests-per-minute limit
+  40.147s          [LLM 4] 6.558s, in 3,024 / out 356 tokens
+                      action:  set_model_response("{\"benign_explanations\": [\"IT administrators performing routine troubleshooting or auditing account permissions and domain controllers.\"], \"agent\": \"log_...)
+  40.149s          [TOOL] set_model_response: returned findings (0.0s)
+  40.151s      < log_network_analyst finished
+  40.151s      [TOOL] log_network_analyst: returned findings (36.69s)
+  40.913s      [LLM 5] 0.752s, in 2,996 / out 61 tokens
+                  action:  threat_intel_analyst({"request": "Map the log findings (discovery commands: whoami /all, net group /domain, nltest /dclist executed via PowerShell) to MITRE ATT&CK techniques, and c...)
+  40.949s      > threat_intel_analyst started
+  42.486s          [LLM 6] 1.533s, in 2,203 / out 82 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Look up ATT&CK techniques for discovery commands (whoami, net group, nltest). 3. Check indicator history and host history. 4. Set model response with mapped techniques and history analysis.
+                      action:  get_specialist_findings({})
+  42.488s          [TOOL] record_plan: success (0.0s)
+  42.489s          [TOOL] get_specialist_findings: success (0.0s)
+  43.349s          [LLM 7] 0.848s, in 3,251 / out 107 tokens
+                      action:  get_alert_indicators({})
+                      action:  get_technique({"technique_id": "T1033"})
+                      action:  get_technique({"technique_id": "T1087"})
+                      action:  get_technique({"technique_id": "T1482"})
+                      action:  check_host_history({"host": "WS-IT-01"})
+  43.351s          [TOOL] get_alert_indicators: success (0.001s)
+  43.352s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  43.353s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  43.353s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+  43.355s          [TOOL] check_host_history: success -> evidence TI-4 (0.001s)
+  44.923s          [WAIT] 1.55s to stay under the requests-per-minute limit
+  45.746s          [LLM 8] 0.823s, in 4,028 / out 78 tokens
+                      action:  check_technique_history({"technique_id": "T1033"})
+                      action:  check_technique_history({"technique_id": "T1087"})
+                      action:  check_technique_history({"technique_id": "T1482"})
+  45.748s          [TOOL] check_technique_history: success -> evidence TI-5 (0.001s)
+  45.750s          [TOOL] check_technique_history: success -> evidence TI-6 (0.001s)
+  45.751s          [TOOL] check_technique_history: success -> evidence TI-7 (0.001s)
+  48.514s          [WAIT] 2.75s to stay under the requests-per-minute limit
+  50.093s          [LLM 9] 1.579s, in 4,525 / out 462 tokens
+                      action:  set_model_response("{\"rejected_hints\": [], \"agent\": \"threat_intel_analyst\", \"techniques\": [{\"evidence_ids\": [\"LN-2\", \"LN-4\", \"TI-1\"], \"tactic\": \"discovery\", \"...)
+  50.095s          [TOOL] set_model_response: returned findings (0.001s)
+  50.097s      < threat_intel_analyst finished
+  50.098s      [TOOL] threat_intel_analyst: returned findings (9.183s)
+  51.034s      [WAIT] 0.92s to stay under the requests-per-minute limit
+  53.052s      [LLM 10] 2.017s, in 4,330 / out 730 tokens
+                  action:  set_model_response("{\"history\": [{\"description\": \"Past alert PA-2026-0922 on host WS-IT-01 involving discovery commands (whoami, nltest, net group) was resolved as benign_tru...)
+  53.054s      [TOOL] set_model_response: None (0.0s)
+  53.058s  < supervisor finished
+  53.087s  [ROUTE] check_findings -> OK
+  53.107s  > report_writer started
+  63.389s      [LLM 11] 10.281s, in 2,180 / out 805 tokens
+                  text:    { "alert_id": "EVAL-12", "severity": "low", "summary": "Alert EVAL-12 reported by EDR on host WS-IT-01 indicates a burst of discovery commands executed via PowerShell under user CORP\\it-admin. Historical data shows an i...
+  63.391s  < report_writer finished
+  63.427s  [CHECK] check_report: 0 issue(s)
+  63.448s  > critic started
+  65.137s      [LLM 12] 1.688s, in 2,002 / out 166 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "unsupported_claim", "detail": "Claim 4 cites only LN-5 for the command line net.exe was executed via PowerShell with the command line net group domain admins /domain, but LN-...
+  65.138s  < critic finished
+  65.171s  [ROUTE] route_after_critic -> REVISE (revision 1)
+  65.191s  > report_writer started
+  74.074s      [LLM 13] 8.883s, in 3,130 / out 808 tokens
+                  text:    { "alert_id": "EVAL-12", "severity": "informational", "summary": "Alert EVAL-12 reported by EDR on host WS-IT-01 indicates a burst of discovery commands executed via PowerShell under user CORP\\it-admin. Historical data ...
+  74.076s  < report_writer finished
+  74.105s  [CHECK] check_report: 0 issue(s)
+  74.126s  > critic started
+  74.795s      [LLM 14] 0.669s, in 2,005 / out 11 tokens
+                  text:    { "verdict": "approve" }
+  74.796s  < critic finished
+  74.825s  [ROUTE] route_after_critic -> FINAL
+  74.846s  [NODE] finalize done

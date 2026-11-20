@@ -1,0 +1,399 @@
+{
+ "alert_id": "EVAL-12",
+ "model": "gemini-3.5-flash-lite",
+ "error": null,
+ "report": {
+  "alert_id": "EVAL-12",
+  "severity": "informational",
+  "summary": "Alert EVAL-12 reported by EDR on host WS-IT-01 indicates a burst of discovery commands executed via PowerShell under user CORP\\it-admin. Historical data shows an identical past alert on the same host resolved as a benign true positive.",
+  "claims": [
+   {
+    "text": "The alerting tool reported that discovery commands were executed in quick succession on host WS-IT-01.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "PowerShell was started by explorer.exe as user CORP\\it-admin between 2026-11-10T14:00:00+00:00 and 2026-11-10T14:02:20+00:00.",
+    "evidence_ids": [
+     "LN-1",
+     "LN-3"
+    ]
+   },
+   {
+    "text": "whoami.exe was executed via PowerShell with the command line whoami /all.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4"
+    ]
+   },
+   {
+    "text": "net.exe was executed via PowerShell with the command line net group \"domain admins\" /domain.",
+    "evidence_ids": [
+     "LN-5"
+    ]
+   },
+   {
+    "text": "nltest.exe was executed via PowerShell with the command line nltest /dclist:corp.",
+    "evidence_ids": [
+     "LN-6"
+    ]
+   },
+   {
+    "text": "Host WS-IT-01 has a past alert PA-2026-0922 involving a burst of discovery commands that was resolved as a benign true positive.",
+    "evidence_ids": [
+     "TI-4"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1033",
+    "name": "System Owner/User Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4",
+     "TI-1"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1087",
+    "name": "Account Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-5",
+     "TI-2"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1482",
+    "name": "Domain Trust Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-6",
+     "TI-3"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Verify if CORP\\it-admin intended to run these discovery commands for administrative tasks.",
+   "Check for any follow-on activity or anomalous lateral movement from WS-IT-01.",
+   "Review past alert PA-2026-0922 documentation to confirm similar administrative context.",
+   "Tune detection rules for WS-IT-01 if this routine IT discovery activity occurs frequently."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-IT-01: 'Discovery commands executed in quick succession'. Description: 'Several account and domain discovery commands within five minutes.'"
+   },
+   {
+    "id": "LN-1",
+    "source_agent": "log_network_analyst",
+    "tool": "get_activity_overview",
+    "summary": "Alert EVAL-12 on host WS-IT-01: 5 process events, 0 network connections, 0 DNS queries between 2026-11-10T14:00:00+00:00 and 2026-11-10T14:02:20+00:00"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3500 C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe started by C:\\Windows\\explorer.exe (pid 2000) as user CORP\\it-admin; command line 'powershell.exe'; 0 connections"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 3510 whoami.exe: 3 different discovery commands within 0:05:00: net_user_group, nltest_trusts, whoami; command line 'whoami /all'"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3510 C:\\Windows\\System32\\whoami.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'whoami /all'; 0 connections"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3520 C:\\Windows\\System32\\net.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'net group \"domain admins\" /domain'; 0 connections"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3530 C:\\Windows\\System32\\nltest.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'nltest /dclist:corp'; 0 connections"
+   },
+   {
+    "id": "TI-4",
+    "source_agent": "threat_intel_analyst",
+    "tool": "check_host_history",
+    "summary": "Host WS-IT-01 had 1 past alert(s): PA-2026-0922 (benign_true_positive, informational): Burst of discovery commands (whoami, nltest, net group)"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1033 'System Owner/User Discovery' (tactics: discovery)"
+   },
+   {
+    "id": "TI-2",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1087 'Account Discovery' (tactics: discovery)"
+   },
+   {
+    "id": "TI-3",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1482 'Domain Trust Discovery' (tactics: discovery)"
+   }
+  ],
+  "revision_rounds": 1
+ },
+ "report_without_critic": {
+  "alert_id": "EVAL-12",
+  "severity": "low",
+  "summary": "Alert EVAL-12 reported by EDR on host WS-IT-01 indicates a burst of discovery commands executed via PowerShell under user CORP\\it-admin. Historical data shows an identical past alert on the same host resolved as a benign true positive.",
+  "claims": [
+   {
+    "text": "The alerting tool reported that discovery commands were executed in quick succession on host WS-IT-01.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "PowerShell was started by explorer.exe as user CORP\\it-admin between 2026-11-10T14:00:00+00:00 and 2026-11-10T14:02:20+00:00.",
+    "evidence_ids": [
+     "LN-1",
+     "LN-3"
+    ]
+   },
+   {
+    "text": "whoami.exe was executed via PowerShell with the command line whoami /all.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4"
+    ]
+   },
+   {
+    "text": "net.exe was executed via PowerShell with the command line net group domain admins /domain.",
+    "evidence_ids": [
+     "LN-5"
+    ]
+   },
+   {
+    "text": "nltest.exe was executed via PowerShell with the command line nltest /dclist:corp.",
+    "evidence_ids": [
+     "LN-6"
+    ]
+   },
+   {
+    "text": "Host WS-IT-01 has a past alert PA-2026-0922 involving a burst of discovery commands that was resolved as a benign true positive.",
+    "evidence_ids": [
+     "TI-4"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1033",
+    "name": "System Owner/User Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4",
+     "TI-1"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1087",
+    "name": "Account Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-5",
+     "TI-2"
+    ],
+    "confidence": "high"
+   },
+   {
+    "technique_id": "T1482",
+    "name": "Domain Trust Discovery",
+    "tactic": "discovery",
+    "evidence_ids": [
+     "LN-6",
+     "TI-3"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Verify if CORP\\it-admin intended to run these discovery commands for administrative tasks.",
+   "Check for any follow-on activity or anomalous lateral movement from WS-IT-01.",
+   "Review past alert PA-2026-0922 documentation to confirm similar administrative context.",
+   "Tune detection rules for WS-IT-01 if this routine IT discovery activity occurs frequently."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-IT-01: 'Discovery commands executed in quick succession'. Description: 'Several account and domain discovery commands within five minutes.'"
+   },
+   {
+    "id": "LN-1",
+    "source_agent": "log_network_analyst",
+    "tool": "get_activity_overview",
+    "summary": "Alert EVAL-12 on host WS-IT-01: 5 process events, 0 network connections, 0 DNS queries between 2026-11-10T14:00:00+00:00 and 2026-11-10T14:02:20+00:00"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3500 C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe started by C:\\Windows\\explorer.exe (pid 2000) as user CORP\\it-admin; command line 'powershell.exe'; 0 connections"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 3510 whoami.exe: 3 different discovery commands within 0:05:00: net_user_group, nltest_trusts, whoami; command line 'whoami /all'"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3510 C:\\Windows\\System32\\whoami.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'whoami /all'; 0 connections"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3520 C:\\Windows\\System32\\net.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'net group \"domain admins\" /domain'; 0 connections"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 3530 C:\\Windows\\System32\\nltest.exe started by C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe (pid 3500) as user CORP\\it-admin; command line 'nltest /dclist:corp'; 0 connections"
+   },
+   {
+    "id": "TI-4",
+    "source_agent": "threat_intel_analyst",
+    "tool": "check_host_history",
+    "summary": "Host WS-IT-01 had 1 past alert(s): PA-2026-0922 (benign_true_positive, informational): Burst of discovery commands (whoami, nltest, net group)"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1033 'System Owner/User Discovery' (tactics: discovery)"
+   },
+   {
+    "id": "TI-2",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1087 'Account Discovery' (tactics: discovery)"
+   },
+   {
+    "id": "TI-3",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1482 'Domain Trust Discovery' (tactics: discovery)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "check_issues_v0": [],
+ "final_issues": [],
+ "review_log": [
+  {
+   "round": 0,
+   "critic_verdict": "revise",
+   "critic_issues": 2,
+   "check_issues": 0
+  },
+  {
+   "round": 1,
+   "critic_verdict": "approve",
+   "critic_issues": 0,
+   "check_issues": 0
+  }
+ ],
+ "delegations": [
+  {
+   "agent": "log_network_analyst",
+   "called": true,
+   "brief": "Analyze the process tree, command lines, and timing of the discovery commands executed on WS-IT-01 for alert EVAL-12."
+  },
+  {
+   "agent": "static_analyst\u064e\u0629",
+   "called": false,
+   "brief": "Skipped because no file was present in the alert."
+  },
+  {
+   "agent": "threat_intel_analyst",
+   "called": true,
+   "brief": "Map the log findings (discovery commands: whoami /all, net group /domain, nltest /dclist executed via PowerShell) to MITRE ATT&CK techniques, and check past-alert history."
+  }
+ ],
+ "ledger_ids": [
+  "AL-1",
+  "LN-1",
+  "LN-2",
+  "LN-3",
+  "LN-4",
+  "LN-5",
+  "LN-6",
+  "TI-1",
+  "TI-2",
+  "TI-3",
+  "TI-4",
+  "TI-5",
+  "TI-6",
+  "TI-7"
+ ],
+ "totals": {
+  "model_calls": 14,
+  "api_calls": 14,
+  "cached_calls": 0,
+  "tool_calls": 26,
+  "input_tokens": 39376,
+  "output_tokens": 3990,
+  "thinking_tokens": 0,
+  "total_tokens": 43366,
+  "estimated_cost_usd": 0.0217878,
+  "wall_time_s": 74.846,
+  "rate_limit_wait_s": 34.49,
+  "errors": 0,
+  "agents": [
+   "intake",
+   "supervisor",
+   "log_network_analyst",
+   "threat_intel_analyst",
+   "check_findings",
+   "report_writer",
+   "check_report",
+   "critic",
+   "route_after_critic",
+   "finalize"
+  ]
+ },
+ "cost": {
+  "reflection_calls": 3,
+  "reflection_tokens": 8122,
+  "calls_by_agent": {
+   "supervisor": 3,
+   "log_network_analyst": 3,
+   "threat_intel_analyst": 4,
+   "report_writer": 2,
+   "critic": 2
+  }
+ }
+}

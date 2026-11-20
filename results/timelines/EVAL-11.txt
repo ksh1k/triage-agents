@@ -1,0 +1,98 @@
+   0.040s  [NODE] intake done
+   0.062s  > supervisor started
+   1.562s      [WAIT] 1.49s to stay under the requests-per-minute limit
+   2.867s      [LLM 1] 1.305s, in 2,000 / out 101 tokens
+                  action:  record_plan("{\"plan\": \"1. Call static_analyst to inspect loader_demo.exe (which has a sample binary available).\\n2. Skip log_network_analyst because process_event_count...)
+   2.868s      [TOOL] record_plan: success (0.0s)
+   3.770s      [WAIT] 0.89s to stay under the requests-per-minute limit
+   4.341s      [LLM 2] 0.571s, in 2,133 / out 61 tokens
+                  action:  static_analyst({"request": "Analyze loader_demo.exe from Downloads folder. Focus on PE structure, imports, sections, strings, and signature given that imported_function_count,...)
+   4.369s      > static_analyst started
+   6.784s          [WAIT] 2.41s to stay under the requests-per-minute limit
+   8.264s          [LLM 3] 1.48s, in 1,763 / out 115 tokens
+                      plan:    1. Get file overview, parse sample binary, analyze imports, analyze sections, and analyze strings. 2. Check specific APIs if needed. 3. Formulate findings and return structured response via set_model_response.
+                      action:  get_file_overview({})
+                      action:  parse_sample_binary({})
+                      action:  analyze_imports({})
+                      action:  analyze_sections({})
+                      action:  analyze_strings({})
+   8.265s          [TOOL] record_plan: success (0.0s)
+   8.266s          [TOOL] get_file_overview: success -> evidence SA-1 (0.0s)
+   8.362s          [TOOL] parse_sample_binary: success -> evidence SA-2 (0.096s)
+   8.363s          [TOOL] analyze_imports: success -> evidence SA-3 (0.0s)
+   8.364s          [TOOL] analyze_sections: success -> evidence SA-4 (0.0s)
+   8.369s          [TOOL] analyze_strings: success -> evidence SA-5, SA-6, SA-7, SA-8 (0.005s)
+   9.963s          [LLM 4] 1.562s, in 3,148 / out 411 tokens
+                      action:  set_model_response("{\"benign_explanations\": [\"The dynamic loading functions (LoadLibrary, GetProcAddress) are commonly used by legitimate software and packers/plugins to resolv...)
+   9.965s          [TOOL] set_model_response: returned findings (0.001s)
+   9.968s      < static_analyst finished
+   9.968s      [TOOL] static_analyst: returned findings (5.626s)
+  11.495s      [LLM 5] 1.516s, in 3,150 / out 74 tokens
+                  action:  threat_intel_analyst({"request": "Map the findings from static analysis (unsigned executable from user Downloads folder, dynamic API resolution, registry run key for persistence, pr...)
+  11.529s      > threat_intel_analyst started
+  38.700s          [WAIT] 27.16s to stay under the requests-per-minute limit
+  40.046s          [LLM 6] 1.346s, in 2,216 / out 84 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Check indicator history and host history, and look up ATT&CK techniques based on specialist hints. 3. Submit final response via set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  40.048s          [TOOL] record_plan: success (0.0s)
+  40.049s          [TOOL] get_specialist_findings: success (0.0s)
+  40.049s          [TOOL] get_alert_indicators: success (0.0s)
+  40.454s          [WAIT] 0.38s to stay under the requests-per-minute limit
+  41.183s          [LLM 7] 0.728s, in 3,425 / out 160 tokens
+                      action:  get_technique({"technique_id": "T1547.001"})
+                      action:  get_technique({"technique_id": "T1027.007"})
+                      action:  check_indicator_history({"indicator_type": "sha256", "value": "f56275f597c07ec56b5d594724bdcbdcee1944341eda5e8d8629afcee3c75e3e"})
+                      action:  check_host_history({"host": "WS-DEV-04"})
+  41.184s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  41.185s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  41.186s          [TOOL] check_indicator_history: success (0.001s)
+  41.188s          [TOOL] check_host_history: success (0.001s)
+  44.045s          [WAIT] 2.83s to stay under the requests-per-minute limit
+  45.449s          [LLM 8] 1.403s, in 4,013 / out 392 tokens
+                      action:  set_model_response("{\"summary\": \"Static analysis of loader_demo.exe (sha256 f56275f597c07ec56b5d594724bdcbdcee1944341eda5e8d8629afcee3c75e3e) found an unsigned executable with ...)
+  45.450s          [TOOL] set_model_response: returned findings (0.0s)
+  45.452s      < threat_intel_analyst finished
+  45.453s      [TOOL] threat_intel_analyst: returned findings (33.956s)
+  46.049s      [WAIT] 0.57s to stay under the requests-per-minute limit
+  50.028s      [LLM 9] 3.979s, in 4,276 / out 738 tokens
+                  action:  set_model_response("{\"key_findings\": [{\"evidence_ids\": [\"AL-1\", \"SA-1\", \"SA-2\", \"SA-3\"], \"description\": \"An unsigned executable (loader_demo.exe) was collected from...)
+  50.030s      [TOOL] set_model_response: error (0.0s)
+  53.581s      [LLM 10] 3.54s, in 5,141 / out 738 tokens
+                  action:  set_model_response("{\"conflicts\": [], \"key_findings\": [{\"description\": \"An unsigned executable (loader_demo.exe) was collected from a user's Downloads folder with a future ...)
+  53.583s      [TOOL] set_model_response: None (0.0s)
+  53.585s  < supervisor finished
+  53.615s  [ROUTE] check_findings -> OK
+  53.634s  > report_writer started
+  56.091s      [LLM 11] 2.456s, in 2,085 / out 639 tokens
+                  text:    { "alert_id": "EVAL-11", "severity": "high", "summary": "An unsigned executable, loader_demo.exe, was found in a user's Downloads folder on host WS-DEV-04 containing a registry Run key string and a prompt injection attem...
+  56.093s  < report_writer finished
+  56.126s  [CHECK] check_report: 0 issue(s)
+  56.156s  > critic started
+  57.686s      [LLM 12] 1.528s, in 1,696 / out 154 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "severity_mismatch", "detail": "Severity is set to high, but the evidence only shows an unexecuted static binary in a Downloads folder with static strings and weak import sign...
+  57.687s  < critic finished
+  57.725s  [ROUTE] route_after_critic -> REVISE (revision 1)
+  57.751s  > report_writer started
+  59.499s      [LLM 13] 1.747s, in 2,857 / out 649 tokens
+                  text:    { "alert_id": "EVAL-11", "severity": "low", "summary": "An unsigned executable, loader_demo.exe, was found in a user's Downloads folder on host WS-DEV-04 containing static strings for a registry path and an external URL,...
+  59.500s  < report_writer finished
+  59.530s  [CHECK] check_report: 1 issue(s) (severity_mismatch)
+  59.550s  > critic started
+  60.597s      [LLM 14] 1.047s, in 1,727 / out 70 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "severity_mismatch", "detail": "Severity is low although an automated check reported a severity mismatch because a specialist reported a strong signal; raise the severity or a...
+  60.599s  < critic finished
+  60.629s  [ROUTE] route_after_critic -> REVISE (revision 2)
+  60.651s  > report_writer started
+  61.626s      [WAIT] 0.96s to stay under the requests-per-minute limit
+  63.433s      [LLM 15] 1.807s, in 2,822 / out 649 tokens
+                  text:    { "alert_id": "EVAL-11", "severity": "high", "summary": "An unsigned executable, loader_demo.exe, was found in a user's Downloads folder on host WS-DEV-04 containing static strings for a registry path and an external URL...
+  63.435s  < report_writer finished
+  63.465s  [CHECK] check_report: 0 issue(s)
+  63.485s  > critic started
+  63.821s      [WAIT] 0.33s to stay under the requests-per-minute limit
+  64.953s      [LLM 16] 1.132s, in 1,706 / out 191 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "severity_mismatch", "detail": "Severity is high, but the evidence only shows an unsigned file with static strings and weak signals (dynamic API resolution, registry path stri...
+  64.954s  < critic finished
+  64.993s  [ROUTE] route_after_critic -> FINAL
+  65.017s  [NODE] finalize done

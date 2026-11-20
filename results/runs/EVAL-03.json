@@ -1,0 +1,239 @@
+{
+ "alert_id": "EVAL-03",
+ "model": "gemini-3.5-flash-lite",
+ "error": null,
+ "report": {
+  "alert_id": "EVAL-03",
+  "severity": "critical",
+  "summary": "An active compromise was detected on host SRV-DB-07 where the alerting tool reported a suspicious rundll32 command line. Examination of process events shows services.exe spawning cmd.exe running a batch script, which subsequently invoked rundll32.exe to perform an LSASS memory dump via comsvcs.dll to C:\\Windows\\Temp\\l.dmp.",
+  "claims": [
+   {
+    "text": "The alerting tool (reported by EDR, not verified by us) flagged a suspicious rundll32 command line on database server SRV-DB-07 involving a system DLL export and process ID argument.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "Services.exe spawned cmd.exe running a batch script as user CORP\\svc-sql on host SRV-DB-07.",
+    "evidence_ids": [
+     "LN-3"
+    ]
+   },
+   {
+    "text": "Rundll32.exe was executed by cmd.exe to dump LSASS memory using C:\\Windows\\System32\\comsvcs.dll, MiniDump targeting PID 624 and writing to C:\\Windows\\Temp\\l.dmp.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1003.001",
+    "name": "LSASS Memory",
+    "tactic": "credential-access",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4",
+     "AL-1",
+     "TI-1"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Isolate host SRV-DB-07 immediately to prevent further credential access and lateral movement.",
+   "Collect memory dump artifacts from C:\\Windows\\Temp\\l.dmp and surrounding filesystem artifacts for forensic analysis.",
+   "Revoke and rotate credentials for user CORP\\svc-sql and any service accounts compromised or exposed during the event.",
+   "Hunt across the enterprise for similar rundll32 invocations of comsvcs.dll and unauthorized batch script executions in temp directories.",
+   "Tune EDR and SIEM detection rules around comsvcs.dll MiniDump usage by non-standard parent processes."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host SRV-DB-07: 'Suspicious rundll32 command line on database server'. Description: 'rundll32 invoked an export of a system DLL with a process ID argument.'"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4410 C:\\Windows\\System32\\cmd.exe started by C:\\Windows\\System32\\services.exe (pid 1800) as user CORP\\svc-sql; command line 'cmd.exe /c C:\\\\Windows\\\\Temp\\\\run.bat'; 0 connections"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 4420 rundll32.exe: attempt to dump LSASS memory (credential theft); command line 'rundll32.exe C:\\\\Windows\\\\System32\\\\comsvcs.dll, MiniDump 624 C:\\\\Windows\\\\Temp\\\\l.dmp full'"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4420 C:\\Windows\\System32\\rundll32.exe started by C:\\Windows\\System32\\cmd.exe (pid 4410) as user CORP\\svc-sql; command line 'rundll32.exe C:\\\\Windows\\\\System32\\\\comsvcs.dll, MiniDump 624 C:\\\\Windows\\\\Temp\\\\l.dmp full'; 0 connections"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1003.001 'LSASS Memory' (tactics: credential-access)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "report_without_critic": {
+  "alert_id": "EVAL-03",
+  "severity": "critical",
+  "summary": "An active compromise was detected on host SRV-DB-07 where the alerting tool reported a suspicious rundll32 command line. Examination of process events shows services.exe spawning cmd.exe running a batch script, which subsequently invoked rundll32.exe to perform an LSASS memory dump via comsvcs.dll to C:\\Windows\\Temp\\l.dmp.",
+  "claims": [
+   {
+    "text": "The alerting tool (reported by EDR, not verified by us) flagged a suspicious rundll32 command line on database server SRV-DB-07 involving a system DLL export and process ID argument.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "Services.exe spawned cmd.exe running a batch script as user CORP\\svc-sql on host SRV-DB-07.",
+    "evidence_ids": [
+     "LN-3"
+    ]
+   },
+   {
+    "text": "Rundll32.exe was executed by cmd.exe to dump LSASS memory using C:\\Windows\\System32\\comsvcs.dll, MiniDump targeting PID 624 and writing to C:\\Windows\\Temp\\l.dmp.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1003.001",
+    "name": "LSASS Memory",
+    "tactic": "credential-access",
+    "evidence_ids": [
+     "LN-2",
+     "LN-4",
+     "AL-1",
+     "TI-1"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Isolate host SRV-DB-07 immediately to prevent further credential access and lateral movement.",
+   "Collect memory dump artifacts from C:\\Windows\\Temp\\l.dmp and surrounding filesystem artifacts for forensic analysis.",
+   "Revoke and rotate credentials for user CORP\\svc-sql and any service accounts compromised or exposed during the event.",
+   "Hunt across the enterprise for similar rundll32 invocations of comsvcs.dll and unauthorized batch script executions in temp directories.",
+   "Tune EDR and SIEM detection rules around comsvcs.dll MiniDump usage by non-standard parent processes."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host SRV-DB-07: 'Suspicious rundll32 command line on database server'. Description: 'rundll32 invoked an export of a system DLL with a process ID argument.'"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4410 C:\\Windows\\System32\\cmd.exe started by C:\\Windows\\System32\\services.exe (pid 1800) as user CORP\\svc-sql; command line 'cmd.exe /c C:\\\\Windows\\\\Temp\\\\run.bat'; 0 connections"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 4420 rundll32.exe: attempt to dump LSASS memory (credential theft); command line 'rundll32.exe C:\\\\Windows\\\\System32\\\\comsvcs.dll, MiniDump 624 C:\\\\Windows\\\\Temp\\\\l.dmp full'"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4420 C:\\Windows\\System32\\rundll32.exe started by C:\\Windows\\System32\\cmd.exe (pid 4410) as user CORP\\svc-sql; command line 'rundll32.exe C:\\\\Windows\\\\System32\\\\comsvcs.dll, MiniDump 624 C:\\\\Windows\\\\Temp\\\\l.dmp full'; 0 connections"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1003.001 'LSASS Memory' (tactics: credential-access)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "check_issues_v0": [],
+ "final_issues": [],
+ "review_log": [
+  {
+   "round": 0,
+   "critic_verdict": "approve",
+   "critic_issues": 0,
+   "check_issues": 0
+  }
+ ],
+ "delegations": [
+  {
+   "agent": "log_network_analyst",
+   "called": true,
+   "brief": "Investigate process events and command lines for alert EVAL-03 on host SRV-DB-07 involving rundll32. Look closely at the process tree, command-line arguments, parent processes, and any suspicious indicators."
+  },
+  {
+   "agent": "static_analyst",
+   "called": false,
+   "brief": "Skipped because file is null."
+  },
+  {
+   "agent": "threat_intel_analyst",
+   "called": true,
+   "brief": "Review findings from log_network_analyst regarding alert EVAL-03. Specifically, services.exe -> cmd.exe -> rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump targeting LSASS memory dump. Map the appropriate MITRE ATT&CK techniques and check past alert history."
+  }
+ ],
+ "ledger_ids": [
+  "AL-1",
+  "LN-1",
+  "LN-2",
+  "LN-3",
+  "LN-4",
+  "TI-1"
+ ],
+ "totals": {
+  "model_calls": 11,
+  "api_calls": 11,
+  "cached_calls": 0,
+  "tool_calls": 19,
+  "input_tokens": 26759,
+  "output_tokens": 2202,
+  "thinking_tokens": 0,
+  "total_tokens": 28961,
+  "estimated_cost_usd": 0.0135327,
+  "wall_time_s": 52.355,
+  "rate_limit_wait_s": 38.39,
+  "errors": 0,
+  "agents": [
+   "intake",
+   "supervisor",
+   "log_network_analyst",
+   "threat_intel_analyst",
+   "check_findings",
+   "report_writer",
+   "check_report",
+   "critic",
+   "route_after_critic",
+   "finalize"
+  ]
+ },
+ "cost": {
+  "reflection_calls": 1,
+  "reflection_tokens": 1515,
+  "calls_by_agent": {
+   "supervisor": 3,
+   "log_network_analyst": 3,
+   "threat_intel_analyst": 3,
+   "report_writer": 1,
+   "critic": 1
+  }
+ }
+}

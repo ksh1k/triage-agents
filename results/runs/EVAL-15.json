@@ -1,0 +1,277 @@
+{
+ "alert_id": "EVAL-15",
+ "model": "gemini-3.5-flash-lite",
+ "error": null,
+ "report": {
+  "alert_id": "EVAL-15",
+  "severity": "medium",
+  "summary": "User CORP\\dev7 executed PowerShell via Visual Studio Code on host WS-ENG-30 to download and expand the utility archive jq-1.8.zip from packages.example (203.0.113.30).",
+  "claims": [
+   {
+    "text": "The alerting tool AL-1 reported that PowerShell downloaded a file from the internet via an Invoke-WebRequest command line.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "Process pid 4100 (Code.exe) spawned powershell.exe (pid 4120) as user CORP\\dev7.",
+    "evidence_ids": [
+     "LN-6"
+    ]
+   },
+   {
+    "text": "PowerShell downloaded and extracted jq-1.8.zip from packages.example (203.0.113.30) to C:\\Users\\dev7\\tools\\jq.zip.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-3",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "There are no network beaconing patterns or DNS anomalies associated with the connections.",
+    "evidence_ids": [
+     "LN-4",
+     "LN-5"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1105",
+    "name": "Ingress Tool Transfer",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6",
+     "TI-1"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Verify with user CORP\\dev7 whether the download of jq-1.8.zip was an authorized developer activity.",
+   "Inspect the contents of C:\\Users\\dev7\\tools\\ to ensure no unauthorized binaries or scripts were introduced.",
+   "Review internal software acquisition policies regarding downloads from packages.example.",
+   "Tune detection rules if developer-initiated tool downloads via VS Code generate expected noise."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-ENG-30: 'PowerShell downloaded a file from the internet'. Description: 'Invoke-WebRequest observed in a PowerShell command line.'"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4120 C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe started by C:\\Users\\dev7\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe (pid 4100) as user CORP\\dev7; command line 'powershell.exe -Command Invoke-WebRequest https://packages.example/tools/jq-1.8.zip -OutFile C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip; Expand-Archive C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip'; 3 connections to 203.0.113.30:443"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 4120 powershell.exe: command downloads content from the network; command line 'powershell.exe -Command Invoke-WebRequest https://packages.example/tools/jq-1.8.zip -OutFile C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip; Expand-Archive C:\\\\Users\\\\dev7\\\\tools\\\\jq.z...'"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "3 connections to 1 external destination(s): 203.0.113.30:443 (packages.example) x3 from pid [4120]"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "check_beaconing",
+    "summary": "No beaconing: 0 external destination(s) had enough connections to test, none on a regular timer"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_dns",
+    "summary": "No DNS anomalies in 1 queries"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1105 'Ingress Tool Transfer' (tactics: command-and-control)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "report_without_critic": {
+  "alert_id": "EVAL-15",
+  "severity": "medium",
+  "summary": "User CORP\\dev7 executed PowerShell via Visual Studio Code on host WS-ENG-30 to download and expand the utility archive jq-1.8.zip from packages.example (203.0.113.30).",
+  "claims": [
+   {
+    "text": "The alerting tool AL-1 reported that PowerShell downloaded a file from the internet via an Invoke-WebRequest command line.",
+    "evidence_ids": [
+     "AL-1"
+    ]
+   },
+   {
+    "text": "Process pid 4100 (Code.exe) spawned powershell.exe (pid 4120) as user CORP\\dev7.",
+    "evidence_ids": [
+     "LN-6"
+    ]
+   },
+   {
+    "text": "PowerShell downloaded and extracted jq-1.8.zip from packages.example (203.0.113.30) to C:\\Users\\dev7\\tools\\jq.zip.",
+    "evidence_ids": [
+     "LN-2",
+     "LN-3",
+     "LN-6"
+    ]
+   },
+   {
+    "text": "There are no network beaconing patterns or DNS anomalies associated with the connections.",
+    "evidence_ids": [
+     "LN-4",
+     "LN-5"
+    ]
+   }
+  ],
+  "techniques": [
+   {
+    "technique_id": "T1105",
+    "name": "Ingress Tool Transfer",
+    "tactic": "command-and-control",
+    "evidence_ids": [
+     "LN-2",
+     "LN-6",
+     "TI-1"
+    ],
+    "confidence": "high"
+   }
+  ],
+  "confidence": "high",
+  "recommended_next_steps": [
+   "Verify with user CORP\\dev7 whether the download of jq-1.8.zip was an authorized developer activity.",
+   "Inspect the contents of C:\\Users\\dev7\\tools\\ to ensure no unauthorized binaries or scripts were introduced.",
+   "Review internal software acquisition policies regarding downloads from packages.example.",
+   "Tune detection rules if developer-initiated tool downloads via VS Code generate expected noise."
+  ],
+  "evidence": [
+   {
+    "id": "AL-1",
+    "source_agent": "alert_intake",
+    "tool": "intake",
+    "summary": "Reported by EDR on host WS-ENG-30: 'PowerShell downloaded a file from the internet'. Description: 'Invoke-WebRequest observed in a PowerShell command line.'"
+   },
+   {
+    "id": "LN-6",
+    "source_agent": "log_network_analyst",
+    "tool": "lookup_process",
+    "summary": "pid 4120 C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe started by C:\\Users\\dev7\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe (pid 4100) as user CORP\\dev7; command line 'powershell.exe -Command Invoke-WebRequest https://packages.example/tools/jq-1.8.zip -OutFile C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip; Expand-Archive C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip'; 3 connections to 203.0.113.30:443"
+   },
+   {
+    "id": "LN-2",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_process_tree",
+    "summary": "pid 4120 powershell.exe: command downloads content from the network; command line 'powershell.exe -Command Invoke-WebRequest https://packages.example/tools/jq-1.8.zip -OutFile C:\\\\Users\\\\dev7\\\\tools\\\\jq.zip; Expand-Archive C:\\\\Users\\\\dev7\\\\tools\\\\jq.z...'"
+   },
+   {
+    "id": "LN-3",
+    "source_agent": "log_network_analyst",
+    "tool": "summarize_network",
+    "summary": "3 connections to 1 external destination(s): 203.0.113.30:443 (packages.example) x3 from pid [4120]"
+   },
+   {
+    "id": "LN-4",
+    "source_agent": "log_network_analyst",
+    "tool": "check_beaconing",
+    "summary": "No beaconing: 0 external destination(s) had enough connections to test, none on a regular timer"
+   },
+   {
+    "id": "LN-5",
+    "source_agent": "log_network_analyst",
+    "tool": "analyze_dns",
+    "summary": "No DNS anomalies in 1 queries"
+   },
+   {
+    "id": "TI-1",
+    "source_agent": "threat_intel_analyst",
+    "tool": "get_technique",
+    "summary": "ATT&CK v20.1 confirms T1105 'Ingress Tool Transfer' (tactics: command-and-control)"
+   }
+  ],
+  "revision_rounds": 0
+ },
+ "check_issues_v0": [],
+ "final_issues": [],
+ "review_log": [
+  {
+   "round": 0,
+   "critic_verdict": "approve",
+   "critic_issues": 0,
+   "check_issues": 0
+  }
+ ],
+ "delegations": [
+  {
+   "agent": "static_analyst",
+   "called": false,
+   "brief": "Skipped because there is no file associated with this alert."
+  },
+  {
+   "agent": "log_network_analyst",
+   "called": true,
+   "brief": "Analyze process tree, command lines, network connections, and DNS queries associated with alert EVAL-15 on host WS-ENG-30. Focus on the Invoke-WebRequest command line, downloaded files, network connections, and DNS queries."
+  },
+  {
+   "agent": "threat_intel_analyst",
+   "called": true,
+   "brief": "Map the findings from log_network_analyst (Invoke-WebRequest downloading a zip file from packages.example via VS Code terminal) to MITRE ATT&CK techniques using local ATT&CK v20.1 dataset, and check past-alert history."
+  }
+ ],
+ "ledger_ids": [
+  "AL-1",
+  "LN-1",
+  "LN-2",
+  "LN-3",
+  "LN-4",
+  "LN-5",
+  "LN-6",
+  "TI-1"
+ ],
+ "totals": {
+  "model_calls": 11,
+  "api_calls": 11,
+  "cached_calls": 0,
+  "tool_calls": 20,
+  "input_tokens": 28077,
+  "output_tokens": 2362,
+  "thinking_tokens": 0,
+  "total_tokens": 30439,
+  "estimated_cost_usd": 0.0143281,
+  "wall_time_s": 56.645,
+  "rate_limit_wait_s": 41.97,
+  "errors": 0,
+  "agents": [
+   "intake",
+   "supervisor",
+   "log_network_analyst",
+   "threat_intel_analyst",
+   "check_findings",
+   "report_writer",
+   "check_report",
+   "critic",
+   "route_after_critic",
+   "finalize"
+  ]
+ },
+ "cost": {
+  "reflection_calls": 1,
+  "reflection_tokens": 1539,
+  "calls_by_agent": {
+   "supervisor": 3,
+   "log_network_analyst": 3,
+   "threat_intel_analyst": 3,
+   "report_writer": 1,
+   "critic": 1
+  }
+ }
+}

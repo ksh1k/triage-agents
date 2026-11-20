@@ -1,0 +1,75 @@
+   0.041s  [NODE] intake done
+   0.063s  > supervisor started
+   0.904s      [WAIT] 0.83s to stay under the requests-per-minute limit
+   2.363s      [LLM 1] 1.458s, in 1,940 / out 175 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process trees, command lines, network connections, and DNS queries for alert EVAL-15. Skip static_analy...)
+                  action:  log_network_analyst({"request": "Analyze process tree, command lines, network connections, and DNS queries associated with alert EVAL-15 on host WS-ENG-30. Focus on the Invoke-WebR...)
+   2.365s      [TOOL] record_plan: success (0.0s)
+   2.398s      > log_network_analyst started
+   2.580s          [WAIT] 0.17s to stay under the requests-per-minute limit
+   4.063s          [LLM 2] 1.483s, in 1,563 / out 130 tokens
+                      plan:    1. Get activity overview and analyze process tree, network, beaconing, and DNS for WS-ENG-30. 2. Lookup suspicious processes based on initial overview and focus on Invoke-WebRequest. 3. Synthesize findings and submit structured response using set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   4.065s          [TOOL] record_plan: success (0.0s)
+   4.066s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+   4.067s          [TOOL] analyze_process_tree: success -> evidence LN-2 (0.001s)
+   4.069s          [TOOL] summarize_network: success -> evidence LN-3 (0.001s)
+   4.070s          [TOOL] check_beaconing: success -> evidence LN-4 (0.001s)
+   4.071s          [TOOL] analyze_dns: success -> evidence LN-5 (0.001s)
+  11.074s          [WAIT] 6.98s to stay under the requests-per-minute limit
+  11.529s          [LLM 3] 0.455s, in 2,445 / out 17 tokens
+                      action:  lookup_process({"pid": 4120})
+  11.531s          [TOOL] lookup_process: success -> evidence LN-6 (0.001s)
+  12.082s          [WAIT] 0.53s to stay under the requests-per-minute limit
+  13.515s          [LLM 4] 1.432s, in 2,695 / out 369 tokens
+                      action:  set_model_response("{\"findings\": [{\"signal\": \"moderate\", \"evidence_ids\": [\"LN-2\", \"LN-6\"], \"description\": \"PowerShell executed an `Invoke-WebRequest` command origin...)
+  13.516s          [TOOL] set_model_response: returned findings (0.001s)
+  13.519s      < log_network_analyst finished
+  13.519s      [TOOL] log_network_analyst: returned findings (11.153s)
+  14.336s      [LLM 5] 0.805s, in 3,031 / out 71 tokens
+                  action:  threat_intel_analyst({"request": "Map the findings from log_network_analyst (Invoke-WebRequest downloading a zip file from packages.example via VS Code terminal) to MITRE ATT&CK tec...)
+  14.371s      > threat_intel_analyst started
+  15.527s          [LLM 6] 1.148s, in 2,213 / out 79 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Look up technique IDs for hints, check indicator history and host history. 3. Submit final assessment using set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  15.529s          [TOOL] record_plan: success (0.0s)
+  15.530s          [TOOL] get_specialist_findings: success (0.001s)
+  15.531s          [TOOL] get_alert_indicators: success (0.001s)
+  48.188s          [WAIT] 32.65s to stay under the requests-per-minute limit
+  48.956s          [LLM 7] 0.767s, in 3,285 / out 112 tokens
+                      action:  get_technique({"technique_id": "T1105"})
+                      action:  check_indicator_history({"indicator_type": "domain", "value": "packages.example"})
+                      action:  check_indicator_history({"indicator_type": "ip", "value": "203.0.113.30"})
+                      action:  check_host_history({"host": "WS-ENG-30"})
+  48.958s          [TOOL] get_technique: success -> evidence TI-1 (0.001s)
+  48.959s          [TOOL] check_indicator_history: success (0.001s)
+  48.961s          [TOOL] check_indicator_history: success (0.001s)
+  48.962s          [TOOL] check_host_history: success (0.001s)
+  49.135s          [WAIT] 0.16s to stay under the requests-per-minute limit
+  50.274s          [LLM 8] 1.139s, in 3,674 / out 314 tokens
+                      action:  set_model_response("{\"gaps\": [\"Context on whether packages.example is an official corporate repository or an unauthorized external domain.\", \"Verification of the exact conten...)
+  50.276s          [TOOL] set_model_response: returned findings (0.001s)
+  50.278s      < threat_intel_analyst finished
+  50.278s      [TOOL] threat_intel_analyst: returned findings (35.941s)
+  50.944s      [WAIT] 0.65s to stay under the requests-per-minute limit
+  52.458s      [LLM 9] 1.514s, in 3,990 / out 535 tokens
+                  action:  set_model_response("{\"alert_id\": \"EVAL-15\", \"history\": [{\"evidence_ids\": [\"TI-1\"], \"description\": \"No prior alert history for domain packages.example, IP 203.0.113.30...)
+  52.460s      [TOOL] set_model_response: None (0.0s)
+  52.462s  < supervisor finished
+  52.490s  [ROUTE] check_findings -> OK
+  52.510s  > report_writer started
+  55.177s      [LLM 10] 2.666s, in 1,713 / out 549 tokens
+                  text:    { "alert_id": "EVAL-15", "severity": "medium", "summary": "User CORP\\dev7 executed PowerShell via Visual Studio Code on host WS-ENG-30 to download and expand the utility archive jq-1.8.zip from packages.example (203.0.1...
+  55.178s  < report_writer finished
+  55.208s  [CHECK] check_report: 0 issue(s)
+  55.228s  > critic started
+  56.588s      [LLM 11] 1.359s, in 1,528 / out 11 tokens
+                  text:    { "verdict": "approve" }
+  56.590s  < critic finished
+  56.621s  [ROUTE] route_after_critic -> FINAL
+  56.645s  [NODE] finalize done

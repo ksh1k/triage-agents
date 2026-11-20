@@ -1,0 +1,73 @@
+   0.046s  [NODE] intake done
+   0.068s  > supervisor started
+   1.944s      [LLM 1] 1.871s, in 1,951 / out 167 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process trees, command lines, connections, and potential beaconing/DNS for EVAL-03.\\n2. Skip static_an...)
+                  action:  log_network_analyst({"request": "Investigate process events and command lines for alert EVAL-03 on host SRV-DB-07 involving rundll32. Look closely at the process tree, command-line...)
+   1.945s      [TOOL] record_plan: success (0.0s)
+   1.976s      > log_network_analyst started
+   3.245s          [LLM 2] 1.265s, in 1,563 / out 117 tokens
+                      plan:    1. Get activity overview and analyze process tree, network, beaconing, and DNS. 2. Look up specific PIDs if needed based on process tree analysis. 3. Submit findings via set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+   3.247s          [TOOL] record_plan: success (0.0s)
+   3.248s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.0s)
+   3.249s          [TOOL] analyze_process_tree: success -> evidence LN-2 (0.001s)
+   3.250s          [TOOL] summarize_network: no_connections (0.0s)
+   3.251s          [TOOL] check_beaconing: no_connections (0.0s)
+   3.252s          [TOOL] analyze_dns: no_dns (0.0s)
+  38.000s          [WAIT] 34.74s to stay under the requests-per-minute limit
+  38.518s          [LLM 3] 0.517s, in 2,207 / out 34 tokens
+                      action:  lookup_process({"pid": 4410})
+                      action:  lookup_process({"pid": 4420})
+  38.521s          [TOOL] lookup_process: success -> evidence LN-3 (0.001s)
+  38.522s          [TOOL] lookup_process: success -> evidence LN-4 (0.001s)
+  39.759s          [WAIT] 1.22s to stay under the requests-per-minute limit
+  40.926s          [LLM 4] 1.166s, in 2,647 / out 273 tokens
+                      action:  set_model_response("{\"agent\": \"log_network_analyst\", \"benign_explanations\": [\"Authorized penetration test or security evaluation (EVAL-03)\"], \"gaps\": [\"Content of C:\\\...)
+  40.927s          [TOOL] set_model_response: returned findings (0.001s)
+  40.930s      < log_network_analyst finished
+  40.931s      [TOOL] log_network_analyst: returned findings (38.985s)
+  41.256s      [WAIT] 0.31s to stay under the requests-per-minute limit
+  41.963s      [LLM 5] 0.706s, in 2,849 / out 87 tokens
+                  action:  threat_intel_analyst({"request": "Review findings from log_network_analyst regarding alert EVAL-03. Specifically, services.exe -> cmd.exe -> rundll32.exe C:\\Windows\\System32\\coms...)
+  41.986s      > threat_intel_analyst started
+  43.029s          [WAIT] 1.03s to stay under the requests-per-minute limit
+  44.145s          [LLM 6] 1.116s, in 2,229 / out 77 tokens
+                      plan:    1. Get specialist findings and alert indicators. 2. Check technique validity for comsvcs.dll MiniDump and indicator history. 3. Map techniques and format final response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  44.146s          [TOOL] record_plan: success (0.0s)
+  44.147s          [TOOL] get_specialist_findings: success (0.0s)
+  44.147s          [TOOL] get_alert_indicators: success (0.0s)
+  44.660s          [LLM 7] 0.507s, in 3,104 / out 58 tokens
+                      action:  get_technique({"technique_id": "T1003.001"})
+                      action:  check_indicator_history({"indicator_type": "filename", "value": "comsvcs.dll"})
+  44.662s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  44.663s          [TOOL] check_indicator_history: success (0.001s)
+  45.373s          [WAIT] 0.69s to stay under the requests-per-minute limit
+  46.582s          [LLM 8] 1.208s, in 3,377 / out 288 tokens
+                      action:  set_model_response("{\"gaps\": [\"Content of C:\\\\Windows\\\\Temp\\\\run.bat was not captured in the event logs\"], \"agent\": \"threat_intel_analyst\", \"summary\": \"Review of ...)
+  46.582s          [TOOL] set_model_response: returned findings (0.0s)
+  46.584s      < threat_intel_analyst finished
+  46.584s      [TOOL] threat_intel_analyst: returned findings (4.62s)
+  48.121s      [LLM 9] 1.53s, in 3,708 / out 507 tokens
+                  action:  set_model_response("{\"key_findings\": [{\"evidence_ids\": [\"LN-1\", \"LN-2\", \"LN-3\", \"LN-4\"], \"signal\": \"strong\", \"description\": \"Execution of a batch script via cmd...)
+  48.122s      [TOOL] set_model_response: None (0.0s)
+  48.124s  < supervisor finished
+  48.155s  [ROUTE] check_findings -> OK
+  48.180s  > report_writer started
+  48.387s      [WAIT] 0.2s to stay under the requests-per-minute limit
+  50.901s      [LLM 10] 2.514s, in 1,616 / out 587 tokens
+                  text:    { "alert_id": "EVAL-03", "severity": "critical", "summary": "An active compromise was detected on host SRV-DB-07 where the alerting tool reported a suspicious rundll32 command line. Examination of process events shows se...
+  50.902s  < report_writer finished
+  50.925s  [CHECK] check_report: 0 issue(s)
+  50.946s  > critic started
+  51.158s      [WAIT] 0.2s to stay under the requests-per-minute limit
+  52.312s      [LLM 11] 1.154s, in 1,508 / out 7 tokens
+                  text:    {"verdict": "approve"}
+  52.312s  < critic finished
+  52.334s  [ROUTE] route_after_critic -> FINAL
+  52.355s  [NODE] finalize done

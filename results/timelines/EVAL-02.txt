@@ -1,0 +1,92 @@
+   0.043s  [NODE] intake done
+   0.064s  > supervisor started
+   1.557s      [LLM 1] 1.488s, in 2,003 / out 193 tokens
+                  action:  record_plan("{\"plan\": \"1. Call log_network_analyst to investigate process trees, command lines, network connections, and DNS activity for rundll32.exe and upd.dll on WS-...)
+                  action:  log_network_analyst({"request": "Investigate process execution and network connections associated with rundll32.exe loading upd.dll on host WS-FIN-11. Look for command lines, proce...)
+   1.559s      [TOOL] record_plan: success (0.0s)
+   1.592s      > log_network_analyst started
+  38.089s          [WAIT] 36.48s to stay under the requests-per-minute limit
+  39.551s          [LLM 2] 1.461s, in 1,563 / out 135 tokens
+                      plan:    1. Get activity overview and analyze process tree, network, beaconing, and DNS for WS-FIN-11. 2. Lookup specific processes related to rundll32.exe and upd.dll to examine command lines and details. 3. Formulate findings and call set_model_response.
+                      action:  get_activity_overview({})
+                      action:  analyze_process_tree({})
+                      action:  summarize_network({})
+                      action:  check_beaconing({})
+                      action:  analyze_dns({})
+  39.559s          [TOOL] record_plan: success (0.0s)
+  39.560s          [TOOL] get_activity_overview: success -> evidence LN-1 (0.001s)
+  39.562s          [TOOL] analyze_process_tree: success -> evidence LN-2, LN-3 (0.001s)
+  39.564s          [TOOL] summarize_network: success -> evidence LN-4 (0.001s)
+  39.566s          [TOOL] check_beaconing: success -> evidence LN-5 (0.002s)
+  39.567s          [TOOL] analyze_dns: success -> evidence LN-6 (0.001s)
+  39.843s          [WAIT] 0.25s to stay under the requests-per-minute limit
+  40.403s          [LLM 3] 0.559s, in 2,752 / out 17 tokens
+                      action:  lookup_process({"pid": 6120})
+  40.405s          [TOOL] lookup_process: success -> evidence LN-7 (0.001s)
+  41.342s          [WAIT] 0.93s to stay under the requests-per-minute limit
+  43.090s          [LLM 4] 1.748s, in 3,079 / out 535 tokens
+                      action:  set_model_response("{\"findings\": [{\"evidence_ids\": [\"LN-2\", \"LN-7\"], \"technique_hints\": [\"T1218.011\"], \"description\": \"rundll32.exe executed from explorer.exe (PID ...)
+  43.091s          [TOOL] set_model_response: returned findings (0.001s)
+  43.094s      < log_network_analyst finished
+  43.094s      [TOOL] log_network_analyst: returned findings (41.535s)
+  43.909s      [LLM 5] 0.801s, in 3,337 / out 102 tokens
+                  action:  threat_intel_analyst("{\"request\": \"Map the findings from log_network_analyst (rundll32 loading DLL from user-writable AppData folder, command-line discovery commands like whoami/...)
+  43.940s      > threat_intel_analyst started
+  44.074s          [WAIT] 0.12s to stay under the requests-per-minute limit
+  45.439s          [LLM 6] 1.365s, in 2,244 / out 90 tokens
+                      plan:    1. Retrieve specialist findings and alert indicators. 2. Look up technique IDs via get_technique for the hints, check indicator history, and check host history. 3. Map techniques and format final response using set_model_response.
+                      action:  get_specialist_findings({})
+                      action:  get_alert_indicators({})
+  45.440s          [TOOL] record_plan: success (0.0s)
+  45.441s          [TOOL] get_specialist_findings: success (0.0s)
+  45.442s          [TOOL] get_alert_indicators: success (0.001s)
+  46.544s          [LLM 7] 1.091s, in 3,667 / out 302 tokens
+                      action:  get_technique({"technique_id": "T1218.011"})
+                      action:  get_technique({"technique_id": "T1033"})
+                      action:  get_technique({"technique_id": "T1087"})
+                      action:  get_technique({"technique_id": "T1482"})
+                      action:  get_technique({"technique_id": "T1071.001"})
+                      action:  check_indicator_history({"indicator_type": "domain", "value": "cdn-sync.badupdate.example"})
+                      action:  check_indicator_history({"value": "198.51.100.23", "indicator_type": "ip"})
+                      action:  check_indicator_history({"value": "bca1dfbfc7a96add27f609bb1db0f350094ebf938b0be6d890216855e6fff803", "indicator_type": "sha256"})
+                      action:  check_host_history({"host": "WS-FIN-11"})
+  46.546s          [TOOL] get_technique: success -> evidence TI-1 (0.0s)
+  46.547s          [TOOL] get_technique: success -> evidence TI-2 (0.0s)
+  46.547s          [TOOL] get_technique: success -> evidence TI-3 (0.0s)
+  46.548s          [TOOL] get_technique: success -> evidence TI-4 (0.0s)
+  46.548s          [TOOL] get_technique: success -> evidence TI-5 (0.0s)
+  46.549s          [TOOL] check_indicator_history: success -> evidence TI-6 (0.001s)
+  46.551s          [TOOL] check_indicator_history: success -> evidence TI-7 (0.001s)
+  46.552s          [TOOL] check_indicator_history: success (0.001s)
+  46.553s          [TOOL] check_host_history: success (0.001s)
+  48.463s          [LLM 8] 1.901s, in 5,340 / out 699 tokens
+                      action:  set_model_response("{\"history\": [{\"description\": \"Indicator domain cdn-sync.badupdate.example matched a past true_positive alert (PA-2026-0901) involving rundll32 loading a D...)
+  48.465s          [TOOL] set_model_response: returned findings (0.001s)
+  48.466s      < threat_intel_analyst finished
+  48.467s      [TOOL] threat_intel_analyst: returned findings (4.556s)
+  51.191s      [LLM 9] 2.718s, in 5,065 / out 1,111 tokens
+                  action:  set_model_response("{\"techniques\": [{\"name\": \"Rundll32\", \"evidence_ids\": [\"LN-2\", \"LN-7\", \"TI-1\"], \"tactic\": \"defense-evasion\", \"confidence\": \"high\", \"techn...)
+  51.192s      [TOOL] set_model_response: None (0.0s)
+  51.194s  < supervisor finished
+  51.218s  [ROUTE] check_findings -> OK
+  51.240s  > report_writer started
+  54.899s      [LLM 10] 3.658s, in 2,776 / out 1,254 tokens
+                  text:    { "alert_id": "EVAL-02", "severity": "critical", "summary": "Alert EVAL-02 on host WS-FIN-11 indicates an active compromise involving rundll32.exe executing a DLL from a user-writable profile directory, performing discov...
+  54.901s  < report_writer finished
+  54.937s  [CHECK] check_report: 1 issue(s) (wrong_tactic)
+  54.964s  > critic started
+  56.344s      [LLM 11] 1.379s, in 2,598 / out 84 tokens
+                  text:    { "verdict": "revise", "issues": [ { "kind": "wrong_tactic", "detail": "T1218.011 'Rundll32' belongs to stealth (Stealth) in ATT&CK v20.1, not 'defense-evasion'." } ] }
+  56.346s  < critic finished
+  56.383s  [ROUTE] route_after_critic -> REVISE (revision 1)
+  56.404s  > report_writer started
+  59.143s      [LLM 12] 2.737s, in 4,152 / out 1,252 tokens
+                  text:    { "alert_id": "EVAL-02", "severity": "critical", "summary": "Alert EVAL-02 on host WS-FIN-11 indicates an active compromise involving rundll32.exe executing a DLL from a user-writable profile directory, performing discov...
+  59.145s  < report_writer finished
+  59.175s  [CHECK] check_report: 0 issue(s)
+  59.196s  > critic started
+  59.890s      [LLM 13] 0.693s, in 2,552 / out 12 tokens
+                  text:    { "verdict": "approve" }
+  59.892s  < critic finished
+  59.931s  [ROUTE] route_after_critic -> FINAL
+  59.964s  [NODE] finalize done
