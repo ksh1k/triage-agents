@@ -3,7 +3,7 @@
 from google.adk.models.google_llm import Gemini
 
 from triage_agents import config
-from triage_agents.models import REQUEST_TIMEOUT_MS, make_model
+from triage_agents.models import REQUEST_TIMEOUT_MS, RETRY, make_model
 
 from .fakes import ScriptedLlm
 
@@ -13,7 +13,8 @@ def test_gemini_gets_timeout_and_retries(monkeypatch):
     model = make_model()
     assert isinstance(model, Gemini)
     assert model.model == config.DEFAULT_MODEL
-    assert model.retry_options.attempts == 3
+    assert model.retry_options.attempts == RETRY.attempts >= 3
+    assert model.retry_options.max_delay >= 40  # Gemini asks for ~30-40 s after a 429
     assert {429, 503, 504} <= set(model.retry_options.http_status_codes)
     assert model.client_kwargs["http_options"].timeout == REQUEST_TIMEOUT_MS
 

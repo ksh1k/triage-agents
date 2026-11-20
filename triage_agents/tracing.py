@@ -54,13 +54,20 @@ class TracePlugin(BasePlugin):
     def _now(self) -> float:
         return round(time.perf_counter() - self._t0, 3)
 
+    def note(self, kind: str, agent: str, **data: Any) -> None:
+        """Let other plugins (e.g. the rate limiter) add a record to this trace."""
+        self._add(kind, agent, **data)
+
     def _add(self, kind: str, agent: str, **data: Any) -> None:
         record = {"seq": len(self.records) + 1, "t": self._now(), "kind": kind, "agent": agent, **data}
         self.records.append(record)
         if self.live:
             detail = data.get("tool") or ", ".join(c["name"] for c in data.get("tool_calls", [])) or ""
+            if kind == "model_response" and not detail and data.get("text"):
+                detail = "text: " + _clip(" ".join(data["text"]), 120)
             extra = (f" in={data['input_tokens']} out={data['output_tokens']} think={data['thinking_tokens']}"
                      f" {data['latency_s']}s" if kind == "model_response" else "")
+            extra += f" waited {data['wait_s']}s" if "wait_s" in data else ""
             err = f" {data['error']}" if "error" in data else ""
             print(f"[{record['t']:8.3f}s] {agent:22} {kind:15} {detail}{extra}{err}", file=sys.stderr, flush=True)
 
@@ -116,11 +123,15 @@ class TracePlugin(BasePlugin):
 
     async def after_tool_callback(self, *, tool, tool_args, tool_context, result):
         start = self._tool_started.pop(tool_context.function_call_id or tool.name, None)
+        if isinstance(result, str) and result.startswith("Error"):
+            result = {"status": "error", "error_message": result}  # e.g. a failed sub-agent
         result = result if isinstance(result, dict) else {"result": result}
         evidence = sorted({v for k, v in _walk(result) if k.endswith("evidence_id") and isinstance(v, str)})
+        # Delegation tools return the specialist's findings, which have no "status" key.
+        status = result.get("status") or ("returned findings" if "agent" in result else None)
         self._add("tool_result", tool_context.agent_name, tool=tool.name,
                   latency_s=round(time.perf_counter() - start, 3) if start else None,
-                  status=result.get("status"), evidence_ids=evidence)
+                  status=status, evidence_ids=evidence)
         return None
 
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
@@ -142,6 +153,8 @@ class TracePlugin(BasePlugin):
             "total_tokens": inp + out + think,
             "estimated_cost_usd": estimate_cost_usd(model, inp, out + think) if model else None,
             "wall_time_s": self.records[-1]["t"] if self.records else 0.0,
+            "rate_limit_wait_s": round(sum(r.get("wait_s", 0) for r in self.records), 2),
+            "errors": sum(r["kind"] in ("model_error", "tool_error") for r in self.records),
             "agents": list(dict.fromkeys(r["agent"] for r in self.records)),
         }
 
@@ -179,12 +192,17 @@ class TracePlugin(BasePlugin):
                 for tx in r["text"]:
                     lines.append(f"{'':10}{pad}    text:    {_clip(tx, 220)}")
                 for c in r["tool_calls"]:
-                    lines.append(f"{'':10}{pad}    action:  {c['name']}({_clip(json.dumps(c['args'], default=str), 160)})")
+                    if c["name"] == "record_plan" and isinstance(c["args"], dict):
+                        lines.append(f"{'':10}{pad}    plan:    {_clip(str(c['args'].get('plan', '')), 300)}")
+                    else:
+                        lines.append(f"{'':10}{pad}    action:  {c['name']}({_clip(json.dumps(c['args'], default=str), 160)})")
             elif k == "tool_result":
                 ev = f" -> evidence {', '.join(r['evidence_ids'])}" if r["evidence_ids"] else ""
                 lines.append(f"{t}  {pad}[TOOL] {r['tool']}: {r['status']}{ev} ({r['latency_s']}s)")
             elif k in ("tool_error", "model_error"):
-                lines.append(f"{t}  {pad}[ERROR] {r.get('tool', 'model')}: {r['error']}")
+                lines.append(f"{t}  {pad}[ERROR] {r.get('tool', 'model')}: {_clip(r['error'], 200)}")
+            elif k == "rate_limit_wait":
+                lines.append(f"{t}  {pad}[WAIT] {r['wait_s']}s to stay under the requests-per-minute limit")
         return "\n".join(lines)
 
 

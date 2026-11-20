@@ -21,7 +21,7 @@ FINDINGS = {
     "findings": [
         {"description": "Resolves APIs at runtime", "evidence_ids": ["SA-3"],
          "technique_hints": ["T1027.007"], "signal": "weak"},
-        {"description": "Contains text addressed to an AI analyst", "evidence_ids": ["SA-5"],
+        {"description": "Contains text addressed to an AI analyst", "evidence_ids": ["SA-6"],
          "technique_hints": [], "signal": "moderate"},
     ],
     "benign_explanations": ["Plugin loaders resolve APIs dynamically"],
@@ -34,6 +34,7 @@ def scripted_run(planner: str = "plan_react"):
         call("get_file_overview"),
         call("parse_sample_binary"),
         call("analyze_imports"),
+        call("analyze_sections"),
         call("analyze_strings"),
         call("set_model_response", **FINDINGS),  # ADK's tool for the structured final answer
     ])
@@ -43,7 +44,7 @@ def scripted_run(planner: str = "plan_react"):
 
 def test_react_loop_runs_tools_and_feeds_results_back():
     llm, result = scripted_run()
-    assert len(llm.requests) == 5
+    assert len(llm.requests) == 6
     # Observation step of ReAct: request 2 carries the result of the tool requested in turn 1.
     observed = function_responses(llm.requests[1])
     assert [r.name for r in observed] == ["get_file_overview"]
@@ -69,12 +70,13 @@ def test_trace_records_the_steps_in_order():
              if r["kind"] in ("agent_start", "tool_call", "agent_end")]
     assert kinds == [("agent_start", None), ("tool_call", "get_file_overview"),
                      ("tool_call", "parse_sample_binary"), ("tool_call", "analyze_imports"),
-                     ("tool_call", "analyze_strings"), ("tool_call", "set_model_response"),
+                     ("tool_call", "analyze_sections"), ("tool_call", "analyze_strings"),
+                     ("tool_call", "set_model_response"),
                      ("agent_end", None)]
     first_result = next(r for r in result.trace.records if r["kind"] == "tool_result")
     assert first_result["evidence_ids"] == ["SA-1"]
     totals = result.trace.totals()
-    assert totals["model_calls"] == 5 and totals["input_tokens"] == 500 and totals["tool_calls"] == 5
+    assert totals["model_calls"] == 6 and totals["input_tokens"] == 600 and totals["tool_calls"] == 6
     timeline = result.trace.format_timeline()
     assert "> static_analyst started" in timeline and "action:  analyze_imports" in timeline
 

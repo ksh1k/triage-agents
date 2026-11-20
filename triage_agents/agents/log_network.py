@@ -5,9 +5,9 @@ from __future__ import annotations
 from google.adk import Agent
 from google.adk.models.base_llm import BaseLlm
 
-from ..schemas import SpecialistFindings
+from ..schemas import AlertBundle, SpecialistFindings
 from ..tools.lognet_tools import LOGNET_TOOLS
-from .base import build_specialist
+from .base import DEFAULT_PLANNER, build_specialist
 
 AGENT_NAME = "log_network_analyst"
 OUTPUT_KEY = "lognet_findings"
@@ -40,9 +40,21 @@ Finish by returning your findings in the required structured format, with agent 
 log_network_analyst."""
 
 
+def required_checks(alert: AlertBundle) -> set[str]:
+    """Tools that must run before this specialist may submit, given which logs the alert has."""
+    required = {"get_activity_overview"}
+    if alert.process_events:
+        required.add("analyze_process_tree")
+    if alert.network_connections:
+        required |= {"summarize_network", "check_beaconing"}
+    if alert.dns_queries:
+        required.add("analyze_dns")
+    return required
+
+
 def build_log_network_analyst(model: str | BaseLlm | None = None, *, as_subagent: bool = False,
-                              planner: str = "plan_react") -> Agent:
+                              planner: str = DEFAULT_PLANNER) -> Agent:
     return build_specialist(
         name=AGENT_NAME, description=DESCRIPTION, instruction=INSTRUCTION, tools=LOGNET_TOOLS,
         output_schema=SpecialistFindings, output_key=OUTPUT_KEY,
-        model=model, as_subagent=as_subagent, planner=planner)
+        model=model, as_subagent=as_subagent, planner=planner, required_tools=required_checks)

@@ -12,9 +12,9 @@ from __future__ import annotations
 from google.adk import Agent
 from google.adk.models.base_llm import BaseLlm
 
-from ..schemas import SpecialistFindings
+from ..schemas import AlertBundle, SpecialistFindings
 from ..tools.static_tools import STATIC_TOOLS
-from .base import build_specialist
+from .base import DEFAULT_PLANNER, build_specialist
 
 AGENT_NAME = "static_analyst"
 OUTPUT_KEY = "static_findings"
@@ -50,9 +50,19 @@ Finish by returning your findings in the required structured format, with agent 
 static_analyst."""
 
 
+def required_checks(alert: AlertBundle) -> set[str]:
+    """Tools that must run before this specialist may submit (enforced by the checklist guard)."""
+    if alert.file is None:
+        return {"get_file_overview"}
+    required = {"get_file_overview", "analyze_imports", "analyze_sections", "analyze_strings"}
+    if alert.file.sample_path:
+        required.add("parse_sample_binary")
+    return required
+
+
 def build_static_analyst(model: str | BaseLlm | None = None, *, as_subagent: bool = False,
-                         planner: str = "plan_react") -> Agent:
+                         planner: str = DEFAULT_PLANNER) -> Agent:
     return build_specialist(
         name=AGENT_NAME, description=DESCRIPTION, instruction=INSTRUCTION, tools=STATIC_TOOLS,
         output_schema=SpecialistFindings, output_key=OUTPUT_KEY,
-        model=model, as_subagent=as_subagent, planner=planner)
+        model=model, as_subagent=as_subagent, planner=planner, required_tools=required_checks)

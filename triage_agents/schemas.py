@@ -188,6 +188,25 @@ class TriageReport(ReportDraft):
 IntelAssessment.model_rebuild()  # resolve the forward reference to TechniqueMapping
 
 
+class Delegation(_Strict):
+    agent: str
+    called: bool
+    brief: str  # the request sent to the specialist, or why it was skipped
+
+
+class MergedFindings(_Strict):
+    """What the Supervisor produces after delegating: the specialists' results merged."""
+
+    alert_id: str
+    delegations: list[Delegation]
+    key_findings: list[Finding]  # merged and de-duplicated; each cites ledger evidence IDs
+    techniques: list[TechniqueMapping]  # only IDs the Threat Intel specialist confirmed
+    history: list[Finding]
+    conflicts: list[str]  # where specialists disagree
+    preliminary_severity: Severity
+    severity_rationale: str
+
+
 class CriticIssue(_Strict):
     kind: Literal[
         "uncited_claim",

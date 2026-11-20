@@ -12,7 +12,7 @@ from google.adk.models.base_llm import BaseLlm
 
 from ..schemas import IntelAssessment
 from ..tools.intel_tools import INTEL_TOOLS
-from .base import build_specialist
+from .base import DEFAULT_PLANNER, build_specialist
 
 AGENT_NAME = "threat_intel_analyst"
 OUTPUT_KEY = "intel_findings"
@@ -52,9 +52,14 @@ Finish by returning your assessment in the required structured format, with agen
 threat_intel_analyst."""
 
 
+def required_checks(alert) -> set[str]:
+    """Tools that must run before this specialist may submit."""
+    return {"get_specialist_findings", "get_alert_indicators"}
+
+
 def build_threat_intel_analyst(model: str | BaseLlm | None = None, *, as_subagent: bool = False,
-                               planner: str = "plan_react") -> Agent:
+                               planner: str = DEFAULT_PLANNER) -> Agent:
     return build_specialist(
         name=AGENT_NAME, description=DESCRIPTION, instruction=INSTRUCTION, tools=INTEL_TOOLS,
         output_schema=IntelAssessment, output_key=OUTPUT_KEY,
-        model=model, as_subagent=as_subagent, planner=planner)
+        model=model, as_subagent=as_subagent, planner=planner, required_tools=required_checks)

@@ -51,6 +51,17 @@ def call(name: str, **args: Any) -> LlmResponse:
         usage_metadata=usage())
 
 
+def calls(*steps: tuple[str, dict]) -> LlmResponse:
+    """A model turn that requests several tool calls at once (parallel function calling)."""
+    parts = [types.Part(function_call=types.FunctionCall(name=name, args=args)) for name, args in steps]
+    return LlmResponse(content=types.Content(role="model", parts=parts), usage_metadata=usage())
+
+
+def user_texts(request: LlmRequest) -> list[str]:
+    """The user-role text an agent received, e.g. the Supervisor's brief to a specialist."""
+    return [p.text for c in request.contents or [] if c.role == "user" for p in c.parts or [] if p.text]
+
+
 def say(text: str) -> LlmResponse:
     """A model turn that is plain text."""
     return LlmResponse(content=types.Content(role="model", parts=[types.Part(text=text)]), usage_metadata=usage())

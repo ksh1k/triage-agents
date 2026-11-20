@@ -16,11 +16,14 @@ from google.genai import types
 from .config import get_settings
 
 REQUEST_TIMEOUT_MS = 60_000
+# A backstop: the rate limiter (ratelimit.py) should prevent most 429s. When one
+# still happens (e.g. another app sharing the project's quota), Gemini asks to
+# wait ~30-40 s, so the backoff is allowed to grow that far.
 RETRY = types.HttpRetryOptions(
-    attempts=3,  # first try + 2 retries
-    initial_delay=2.0,  # seconds, doubled each retry
+    attempts=4,  # first try + 3 retries
+    initial_delay=5.0,  # seconds: 5, 10, 20, then capped
     exp_base=2.0,
-    max_delay=20.0,
+    max_delay=45.0,
     http_status_codes=[429, 500, 502, 503, 504],
 )
 

@@ -13,7 +13,7 @@ from triage_agents.analysis.evidence import EvidenceLedger
 from triage_agents.runner import run_agent
 from triage_agents.schemas import AlertBundle, IntelAssessment, SpecialistFindings
 
-from .fakes import ScriptedLlm, call, function_responses
+from .fakes import ScriptedLlm, call, calls, function_responses
 
 ROOT = Path(__file__).resolve().parent.parent
 ALERT = AlertBundle.model_validate_json((ROOT / "examples" / "alerts" / "beacon_rundll32.json").read_text())
@@ -46,7 +46,8 @@ TI_OUTPUT = {
 
 def run_lognet():
     llm = ScriptedLlm(script=[
-        call("get_activity_overview"), call("analyze_process_tree"), call("check_beaconing"),
+        call("get_activity_overview"), call("analyze_process_tree"),
+        calls(("summarize_network", {}), ("check_beaconing", {}), ("analyze_dns", {})),
         call("lookup_process", pid=6120), call("set_model_response", **LN_OUTPUT)])
     return llm, asyncio.run(run_agent(build_log_network_analyst(model=llm), ALERT))
 
@@ -63,7 +64,8 @@ def test_lognet_agent_runs_tools_and_returns_findings():
 def test_intel_agent_builds_on_lognet_state():
     _, ln_result = run_lognet()
     llm = ScriptedLlm(script=[
-        call("get_specialist_findings"), call("get_technique", technique_id="T1218.011"),
+        calls(("get_specialist_findings", {}), ("get_alert_indicators", {})),
+        call("get_technique", technique_id="T1218.011"),
         call("check_indicator_history", indicator_type="ip", value="198.51.100.23"),
         call("set_model_response", **TI_OUTPUT)])
     result = asyncio.run(run_agent(build_threat_intel_analyst(model=llm), ALERT,
