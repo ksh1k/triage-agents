@@ -42,6 +42,9 @@ class PESection(_Strict):
     virtual_size: int = Field(ge=0)
     raw_size: int = Field(ge=0)
     entropy: float | None = Field(default=None, ge=0.0, le=8.0)
+    max_window_entropy: float | None = Field(default=None, ge=0.0, le=8.0)
+    executable: bool | None = None
+    writable: bool | None = None
 
 
 class FileMetadata(_Strict):
