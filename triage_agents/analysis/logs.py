@@ -152,9 +152,11 @@ COMMAND_RULES = [
                 "registry Run key added (starts a program at logon)", ("T1547.001",), 2),
     CommandRule("defender_tamper",
                 _rx(r"(?:Set-MpPreference\b.*-Disable|Add-MpPreference\b.*-Exclusion|sc(?:\.exe)?\s+(?:stop|config)\s+WinDefend)"),
-                "attempt to disable or weaken Microsoft Defender", ("T1562.001",), 3),
+                # ATT&CK v20 moved this from T1562.001 to T1685 (new Defense Impairment tactic).
+                "attempt to disable or weaken Microsoft Defender", ("T1685",), 3),
     CommandRule("event_log_clearing", _rx(r"(?:wevtutil(?:\.exe)?\s+cl\b|Clear-EventLog)"),
-                "Windows event logs cleared", ("T1070.001",), 3),
+                # ATT&CK v20 moved this from T1070.001 to T1685.005.
+                "Windows event logs cleared", ("T1685.005",), 3),
     CommandRule("shadow_copy_deletion",
                 _rx(r"(?:vssadmin(?:\.exe)?\b.*delete\s+shadows|wmic(?:\.exe)?\b.*shadowcopy\s+delete|wbadmin(?:\.exe)?\b.*delete\s+catalog)"),
                 "volume shadow copies deleted (blocks recovery; common before ransomware)", ("T1490",), 3),
