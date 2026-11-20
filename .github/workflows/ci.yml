@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Offline tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install uv
+        run: pip install "uv==0.11.6"
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Run tests (no API key; scripted fake models only)
+        run: uv run pytest -q
+
+  docker:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t triage-agents:ci .
+      - name: Smoke test /healthz
+        run: |
+          docker run -d --name api -p 8080:8080 triage-agents:ci
+          for i in $(seq 1 30); do curl -fsS localhost:8080/healthz && exit 0; sleep 1; done
+          docker logs api; exit 1

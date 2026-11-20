@@ -1,0 +1,22 @@
+# Never send secrets or local state into the build context.
+.env
+.env.*
+!.env.example
+.git
+.githooks
+.venv
+cache
+traces
+notes
+results
+__pycache__
+*.pyc
+.pytest_cache
+
+# Not needed at runtime.
+data/raw
+data/past_alerts.db
+tests
+eval
+examples
+docs

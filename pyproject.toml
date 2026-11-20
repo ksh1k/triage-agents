@@ -5,10 +5,12 @@ description = "Multi-agent security-alert triage built with Google's Agent Devel
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.115",
     "google-adk>=2.15,<3",
     "pefile>=2024.8.26",
     "pydantic>=2.7",
     "python-dotenv>=1.0",
+    "uvicorn>=0.30",
 ]
 
 [project.scripts]
@@ -16,6 +18,7 @@ triage = "triage_agents.cli:main"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.27",
     "pytest>=8",
     "ziglang>=0.17.1",
 ]
