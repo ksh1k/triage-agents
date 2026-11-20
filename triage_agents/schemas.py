@@ -19,9 +19,9 @@ T1055 a real ATT&CK ID?", happen later in the deterministic report checker.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
 Severity = Literal["informational", "low", "medium", "high", "critical"]
 SEVERITY_ORDER: list[str] = ["informational", "low", "medium", "high", "critical"]
@@ -120,62 +120,87 @@ class Evidence(_Strict):
 # ---------------------------------------------------------------- Specialist output
 
 
-class Finding(_Strict):
+def _to_str_list(value):
+    """Accept ["a", "b"] but also [{"technique_id": "T1547.001", "reason": "..."}]: models sometimes
+    return objects where a list of strings is expected (seen live for rejected_hints). Objects are
+    flattened to "value: value" text instead of failing validation and costing a retry."""
+    if not isinstance(value, list):
+        return value
+    return [item if isinstance(item, str) else
+            ": ".join(str(v) for v in item.values()) if isinstance(item, dict) else str(item)
+            for item in value]
+
+
+# Same JSON schema as list[str] (so the model is still asked for strings); just forgiving on input.
+StrList = Annotated[list[str], BeforeValidator(_to_str_list)]
+
+
+class _LlmOut(BaseModel):
+    """Base for shapes an LLM fills in. Lenient on purpose: unknown keys are ignored and
+    list fields default to empty. In the first live Supervisor run, Threat Intel's first
+    answer failed strict validation and ADK had to ask again, which cost an extra call.
+    Missing citations are still caught, by the report checker, where they become
+    feedback for revision instead of a crash."""
+
+    model_config = ConfigDict(extra="ignore")
+
+
+class Finding(_LlmOut):
     description: str
-    evidence_ids: list[str]  # IDs returned by this specialist's tools, e.g. ["SA-2", "SA-4"]
-    technique_hints: list[str]  # candidate ATT&CK IDs; the Threat Intel agent confirms them
+    evidence_ids: list[str] = Field(default_factory=list)  # e.g. ["SA-2", "SA-4"]
+    technique_hints: list[str] = Field(default_factory=list)  # Threat Intel confirms these
     signal: Literal["benign", "weak", "moderate", "strong"]
 
 
-class SpecialistFindings(_Strict):
+class SpecialistFindings(_LlmOut):
     """What each specialist agent hands back to the Supervisor."""
 
     agent: str
     summary: str
-    findings: list[Finding]
-    benign_explanations: list[str]  # innocent reasons that could explain what was seen
-    gaps: list[str]  # what the specialist could not check
+    findings: list[Finding] = Field(default_factory=list)
+    benign_explanations: StrList = Field(default_factory=list)  # innocent explanations that fit
+    gaps: StrList = Field(default_factory=list)  # what the specialist could not check
 
 
-class IntelAssessment(_Strict):
+class IntelAssessment(_LlmOut):
     """What the Threat Intel specialist hands back: confirmed ATT&CK mappings and history."""
 
     agent: str
     summary: str
     # Each mapping cites the behavior evidence (SA-/LN-) AND the TI- evidence
     # that confirmed the ID exists in the pinned ATT&CK version.
-    techniques: list["TechniqueMapping"]
-    rejected_hints: list[str]  # hints not supported by evidence, each with the reason
-    history: list[Finding]  # matches against past alerts and how they were resolved
-    gaps: list[str]
+    techniques: list["TechniqueMapping"] = Field(default_factory=list)
+    rejected_hints: StrList = Field(default_factory=list)  # unsupported hints, with reasons
+    history: list[Finding] = Field(default_factory=list)  # past-alert matches and their verdicts
+    gaps: StrList = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------- 3. Output
 
 
-class Claim(_Strict):
+class Claim(_LlmOut):
     text: str
-    evidence_ids: list[str]  # must cite at least one existing evidence ID
+    evidence_ids: list[str] = Field(default_factory=list)  # the checker flags an empty list
 
 
-class TechniqueMapping(_Strict):
+class TechniqueMapping(_LlmOut):
     technique_id: str  # e.g. "T1055" or "T1055.012"
     name: str
     tactic: str
-    evidence_ids: list[str]
+    evidence_ids: list[str] = Field(default_factory=list)
     confidence: Confidence
 
 
-class ReportDraft(_Strict):
+class ReportDraft(_LlmOut):
     """What the Report Writer LLM produces (and the Critic reviews)."""
 
     alert_id: str
     severity: Severity
     summary: str
-    claims: list[Claim]
-    techniques: list[TechniqueMapping]
+    claims: list[Claim] = Field(default_factory=list)
+    techniques: list[TechniqueMapping] = Field(default_factory=list)
     confidence: Confidence
-    recommended_next_steps: list[str]
+    recommended_next_steps: StrList = Field(default_factory=list)
 
 
 class TriageReport(ReportDraft):
@@ -188,37 +213,42 @@ class TriageReport(ReportDraft):
 IntelAssessment.model_rebuild()  # resolve the forward reference to TechniqueMapping
 
 
-class Delegation(_Strict):
+class Delegation(_LlmOut):
     agent: str
     called: bool
     brief: str  # the request sent to the specialist, or why it was skipped
 
 
-class MergedFindings(_Strict):
+class MergedFindings(_LlmOut):
     """What the Supervisor produces after delegating: the specialists' results merged."""
 
     alert_id: str
-    delegations: list[Delegation]
-    key_findings: list[Finding]  # merged and de-duplicated; each cites ledger evidence IDs
-    techniques: list[TechniqueMapping]  # only IDs the Threat Intel specialist confirmed
-    history: list[Finding]
-    conflicts: list[str]  # where specialists disagree
+    delegations: list[Delegation] = Field(default_factory=list)
+    key_findings: list[Finding] = Field(default_factory=list)  # each cites ledger evidence IDs
+    techniques: list[TechniqueMapping] = Field(default_factory=list)  # confirmed by Threat Intel
+    history: list[Finding] = Field(default_factory=list)
+    conflicts: StrList = Field(default_factory=list)  # where specialists disagree
     preliminary_severity: Severity
     severity_rationale: str
 
 
-class CriticIssue(_Strict):
-    kind: Literal[
-        "uncited_claim",
-        "unknown_evidence_id",
-        "invalid_technique_id",
-        "severity_mismatch",
-        "unsupported_technique",
-        "other",
-    ]
+IssueKind = Literal[
+    "uncited_claim",          # a claim cites no evidence
+    "unknown_evidence_id",    # a citation that isn't in the ledger
+    "invalid_technique_id",   # not in ATT&CK v20.1 (or revoked)
+    "wrong_tactic",           # tactic doesn't belong to that technique in v20.1
+    "unsupported_technique",  # technique cites no behavior evidence (SA-/LN-)
+    "unsupported_claim",      # cited evidence doesn't actually say what the claim says
+    "severity_mismatch",      # severity doesn't fit the evidence / rubric
+    "other",
+]
+
+
+class CriticIssue(_LlmOut):
+    kind: IssueKind
     detail: str
 
 
-class Critique(_Strict):
+class Critique(_LlmOut):
     verdict: Literal["approve", "revise"]
-    issues: list[CriticIssue]
+    issues: list[CriticIssue] = Field(default_factory=list)

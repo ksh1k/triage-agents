@@ -15,8 +15,7 @@ from triage_agents.agents.threat_intel import build_threat_intel_analyst
 from triage_agents.analysis.evidence import EvidenceLedger
 from triage_agents.runner import run_agent
 from triage_agents.schemas import AlertBundle, MergedFindings
-from triage_agents.tools.common import ALERT_KEY
-from triage_agents.tools.supervisor_tools import get_alert_summary, get_evidence_ledger
+from triage_agents.tools.supervisor_tools import alert_brief, alert_summary, attach_evidence_ledger
 
 from .fakes import ScriptedLlm, call, calls, function_responses, user_texts
 
@@ -61,12 +60,11 @@ def build_team():
     intel_llm = ScriptedLlm(script=[calls(("get_specialist_findings", {}), ("get_alert_indicators", {})),
                                     call("get_technique", technique_id="T1218.011"),
                                     call("set_model_response", **INTEL)])
-    sup_llm = ScriptedLlm(script=[
-        call("get_alert_summary"),
-        calls(("static_analyst", {"request": "Check upd.dll imports and sections."}),
+    sup_llm = ScriptedLlm(script=[  # three turns: plan + delegate, delegate intel, submit
+        calls(("record_plan", {"plan": "1. static + lognet in parallel 2. intel 3. merge"}),
+              ("static_analyst", {"request": "Check upd.dll imports and sections."}),
               ("log_network_analyst", {"request": "Check rundll32 tree and beaconing."})),
         call("threat_intel_analyst", request="Map findings to ATT&CK, check history."),
-        call("get_evidence_ledger"),
         call("set_model_response", **MERGED),
     ])
     supervisor = build_supervisor(model=sup_llm, sub_agents=[
@@ -79,13 +77,12 @@ def build_team():
 
 def run_team():
     team = build_team()
-    return team, asyncio.run(run_agent(team.agent, ALERT))
+    return team, asyncio.run(run_agent(team.agent, ALERT, prompt=alert_brief(ALERT)))
 
 
 def test_supervisor_gets_one_delegation_tool_per_specialist():
     names = {getattr(t, "name", getattr(t, "__name__", "")) for t in build_team().agent.tools}
-    assert {"static_analyst", "log_network_analyst", "threat_intel_analyst",
-            "get_alert_summary", "get_evidence_ledger"} <= names
+    assert names == {"record_plan", "static_analyst", "log_network_analyst", "threat_intel_analyst"}
 
 
 def test_briefs_reach_the_specialists():
@@ -97,9 +94,19 @@ def test_briefs_reach_the_specialists():
 
 def test_specialist_results_come_back_to_the_supervisor():
     team, _ = run_team()
-    returned = {r.name: r.response for r in function_responses(team.sup.requests[2])}
+    returned = {r.name: r.response for r in function_responses(team.sup.requests[1])}
     assert returned["static_analyst"]["agent"] == "static_analyst"
     assert returned["log_network_analyst"]["findings"][0]["evidence_ids"] == ["LN-2"]
+    # The evidence ledger rides along with the results (no separate model call needed).
+    ledger_ids = {e["id"] for e in returned["log_network_analyst"]["evidence_ledger_so_far"]}
+    assert {"SA-1", "LN-1", "LN-2"} <= ledger_ids
+
+
+def test_supervisor_takes_three_turns_and_gets_the_summary_as_input():
+    team, _ = run_team()
+    assert len(team.sup.requests) == 3
+    first_input = " ".join(user_texts(team.sup.requests[0]))
+    assert '"connection_count": 36' in first_input and "UNTRUSTED DATA" in first_input
 
 
 def test_intel_reads_the_other_specialists_from_shared_state():
@@ -145,11 +152,14 @@ def test_failed_specialist_does_not_crash_the_run():
     assert any(r["kind"] == "tool_result" and r["status"] == "error" for r in result.trace.records)
 
 
-def test_supervisor_tools():
-    ctx = SimpleNamespace(state={ALERT_KEY: ALERT_JSON})
-    summary = get_alert_summary(ctx)
-    assert summary["has_file"] and summary["file"]["has_sample_binary"] is False
+def test_alert_summary_and_ledger_attachment():
+    summary = alert_summary(ALERT)
+    assert summary["file"]["has_sample_binary"] is False
     assert (summary["process_event_count"], summary["connection_count"]) == (6, 36)
-    logs_only = SimpleNamespace(state={ALERT_KEY: {**ALERT_JSON, "file": None}})
-    assert get_alert_summary(logs_only)["has_file"] is False
-    assert get_evidence_ledger(ctx) == {"status": "success", "count": 0, "evidence": []}
+    assert alert_summary(ALERT.model_copy(update={"file": None}))["file"] is None
+    ctx = SimpleNamespace(state={"evidence_SA": [{"id": "SA-1", "source_agent": "static_analyst",
+                                                  "tool": "t", "summary": "s"}]})
+    tool = SimpleNamespace(name="static_analyst")
+    patched = attach_evidence_ledger(tool, {}, ctx, {"agent": "static_analyst"})
+    assert patched["evidence_ledger_so_far"] == [{"id": "SA-1", "summary": "s"}]
+    assert attach_evidence_ledger(SimpleNamespace(name="record_plan"), {}, ctx, {"status": "success"}) is None

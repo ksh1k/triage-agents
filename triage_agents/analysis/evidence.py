@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Any, Protocol
 
 AGENT_PREFIXES: dict[str, str] = {
+    "alert_intake": "AL",  # the alert itself, as reported by the source tool (not verified)
     "static_analyst": "SA",
     "log_network_analyst": "LN",
     "threat_intel_analyst": "TI",

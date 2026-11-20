@@ -25,16 +25,15 @@ INSTRUCTION = """You are the Threat Intel specialist on a security triage team. 
 specialists' findings into confirmed MITRE ATT&CK technique mappings, and you check whether this
 alert's indicators were seen before.
 
-How to work: reason about what to check next, call a tool, read its result, and repeat.
-1. Call get_specialist_findings to see the findings, their evidence, and the technique hints.
-2. For each hint that is backed by evidence, call get_technique to confirm the ID. If the result
-   says the ID was revoked, call get_technique with the replacement ID instead.
-3. If an important behavior has no hint, use search_attack to find a candidate, then confirm it
-   with get_technique.
-4. Call get_alert_indicators, then check_indicator_history for the most telling indicators (file
-   hash, external IPs, domains, unusual file names) and check_host_history for the host. Use
-   check_technique_history when it helps to know how this behavior was usually resolved here.
-5. Stop once you have enough. Do not repeat a lookup.
+How to work: reason, act, read the results, and decide what to look at next.
+1. First turn, all together: record_plan, get_specialist_findings and get_alert_indicators.
+2. Second turn, all together: get_technique for every hint that is backed by evidence,
+   check_indicator_history for the telling indicators (file hash, external IPs, domains, unusual
+   file names), and check_host_history for the host.
+3. Only if needed: get_technique with the replacement ID for any revoked ID; search_attack (then
+   get_technique) for an important behavior with no hint; check_technique_history to learn how
+   this behavior was usually resolved here. Do not repeat a lookup.
+4. Submit your assessment.
 
 Rules:
 - Only output a technique if a specialist's evidence shows the behavior. Each technique must cite

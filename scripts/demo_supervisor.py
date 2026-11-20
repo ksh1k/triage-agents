@@ -25,12 +25,14 @@ from triage_agents.analysis.evidence import EvidenceLedger
 from triage_agents.config import api_key_configured, get_settings
 from triage_agents.runner import run_agent
 from triage_agents.schemas import AlertBundle
+from triage_agents.tools.supervisor_tools import alert_brief
 
 
-async def run_one(path: Path, planner: str) -> bool:
+async def run_one(path: Path, planner: str, cache: bool) -> bool:
     settings = get_settings()
     alert = AlertBundle.model_validate_json(path.read_text(encoding="utf-8"))
-    result = await run_agent(build_supervisor(planner=planner), alert, live_trace=True)
+    result = await run_agent(build_supervisor(planner=planner), alert, prompt=alert_brief(alert),
+                             live_trace=True, cache=cache)
     trace_path = result.trace.write_jsonl(settings.traces_dir / f"{alert.alert_id}-supervisor.jsonl")
 
     print(f"\n######## {alert.alert_id}: {alert.title}")
@@ -48,8 +50,8 @@ async def run_one(path: Path, planner: str) -> bool:
     return result.ok
 
 
-async def run_all(paths: list[Path], planner: str) -> bool:
-    results = [await run_one(p, planner) for p in paths]
+async def run_all(paths: list[Path], planner: str, cache: bool) -> bool:
+    results = [await run_one(p, planner, cache) for p in paths]
     return all(results)
 
 
@@ -57,11 +59,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("alerts", type=Path, nargs="+")
     parser.add_argument("--planner", choices=["none", "plan_react", "builtin"], default="none")
+    parser.add_argument("--cache", action="store_true", help="record/replay model responses (cache/llm/)")
     args = parser.parse_args()
     if not api_key_configured():
         print("GOOGLE_API_KEY is not set (put it in .env).", file=sys.stderr)
         return 1
-    return 0 if asyncio.run(run_all(args.alerts, args.planner)) else 1
+    return 0 if asyncio.run(run_all(args.alerts, args.planner, args.cache)) else 1
 
 
 if __name__ == "__main__":

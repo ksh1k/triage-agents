@@ -34,3 +34,6 @@ Thumbs.db
 data/samples/src/high_entropy.c
 *.pdb
 data/*.tmp
+
+# Record-and-replay cache of model responses (triage_agents/cache.py)
+cache/

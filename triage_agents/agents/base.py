@@ -47,10 +47,11 @@ def make_planner(kind: str) -> BasePlanner | None:
 # their checks, one ended with plain text instead of its structured result, and
 # one made four lookups one at a time.
 TEAM_RULES = """Working as part of the team:
-- Your first action is a call to record_plan with a short numbered plan. Then carry it out.
-- The request you receive may focus on one aspect. Still run your standard checks (the numbered
-  steps above), then look deeper where the request points.
-- When several tool calls do not depend on each other, make them in the same turn.
+- Call record_plan with a short numbered plan in the SAME turn as your first tool calls.
+- Make independent tool calls together in one turn. Each extra turn costs time and quota, so most
+  of your work should take two or three turns.
+- The request you receive may focus on one aspect. Still run your standard checks, then look
+  deeper where the request points.
 - Your final step must be a call to set_model_response with your structured result. Never finish
   with a plain-text answer."""
 

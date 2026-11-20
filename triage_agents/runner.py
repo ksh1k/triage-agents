@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from google.adk.agents import RunConfig
@@ -20,6 +21,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
+from .cache import ResponseCachePlugin, cache_enabled
 from .config import MAX_LLM_CALLS_PER_RUN
 from .ratelimit import RateLimitPlugin
 from .schemas import AlertBundle
@@ -52,18 +54,25 @@ def default_prompt(alert: AlertBundle) -> str:
 
 async def run_agent(root_agent, alert: AlertBundle, prompt: str | None = None, *,
                     live_trace: bool = False, max_llm_calls: int = MAX_LLM_CALLS_PER_RUN,
-                    initial_state: dict[str, Any] | None = None, rpm: int | None = None) -> RunResult:
-    """Run one agent on one alert.
+                    initial_state: dict[str, Any] | None = None, rpm: int | None = None,
+                    cache: bool | None = None, cache_dir: Path | None = None) -> RunResult:
+    """Run one agent (or the whole workflow) on one alert.
 
     `initial_state` carries results from earlier runs (e.g. evidence and
     findings from other specialists); "temp:" keys are dropped. `rpm`
     overrides the requests-per-minute limit (default TRIAGE_RPM or 14; 0 = off).
+    `cache` turns on record-and-replay of model responses (default: TRIAGE_CACHE).
     """
     state = {k: v for k, v in (initial_state or {}).items() if not k.startswith("temp:")}
     state[ALERT_KEY] = alert.model_dump(mode="json")
     trace = TracePlugin(live=live_trace)
-    # Rate limiter first, so the trace's model latency excludes time spent waiting.
-    app = App(name=APP_NAME, root_agent=root_agent, plugins=[RateLimitPlugin(trace=trace, rpm=rpm), trace])
+    # Order matters: a cache hit skips the later plugins (no rate-limit wait for a replay),
+    # and the limiter runs before the trace so model latency excludes time spent waiting.
+    plugins = []
+    if cache_enabled() if cache is None else cache:
+        plugins.append(ResponseCachePlugin(trace=trace, **({"directory": cache_dir} if cache_dir else {})))
+    plugins += [RateLimitPlugin(trace=trace, rpm=rpm), trace]
+    app = App(name=APP_NAME, root_agent=root_agent, plugins=plugins)
     runner = InMemoryRunner(app=app)
     started = time.perf_counter()
     session = await runner.session_service.create_session(app_name=APP_NAME, user_id=USER_ID, state=state)

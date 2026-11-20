@@ -93,6 +93,13 @@ class TracePlugin(BasePlugin):
         agent = callback_context.agent_name
         starts = self._model_started[agent]
         latency = round(time.perf_counter() - starts.pop(), 3) if starts else None
+        self.record_model_response(agent, llm_response, latency)
+        return None
+
+    def record_model_response(self, agent: str, llm_response, latency: float | None,
+                              cached: bool = False) -> None:
+        """Record one model response. Also called by the response cache on a hit, because ADK
+        skips after_model callbacks when a plugin answers a request itself."""
         usage = llm_response.usage_metadata
         thoughts, texts, calls = [], [], []
         for part in (llm_response.content.parts if llm_response.content else None) or []:
@@ -108,9 +115,8 @@ class TracePlugin(BasePlugin):
             output_tokens=(usage.candidates_token_count or 0) if usage else 0,
             thinking_tokens=(usage.thoughts_token_count or 0) if usage else 0,
             thoughts=thoughts, text=texts, tool_calls=calls,
-            model_version=llm_response.model_version,
+            model_version=llm_response.model_version, cached=cached,
         )
-        return None
 
     async def on_model_error_callback(self, *, callback_context, llm_request, error):
         self._add("model_error", callback_context.agent_name, error=_clip(repr(error), 300))
@@ -127,11 +133,15 @@ class TracePlugin(BasePlugin):
             result = {"status": "error", "error_message": result}  # e.g. a failed sub-agent
         result = result if isinstance(result, dict) else {"result": result}
         evidence = sorted({v for k, v in _walk(result) if k.endswith("evidence_id") and isinstance(v, str)})
-        # Delegation tools return the specialist's findings, which have no "status" key.
-        status = result.get("status") or ("returned findings" if "agent" in result else None)
+        # Delegation tools return the specialist's findings, which have no "status" key;
+        # set_model_response returns {"error": ...} when the answer fails schema validation.
+        status = result.get("status") or ("error" if "error" in result else
+                                          "returned findings" if "agent" in result else None)
+        extra = {"error": _clip(str(result.get("error") or result.get("error_message")), 300)} \
+            if status == "error" else {}
         self._add("tool_result", tool_context.agent_name, tool=tool.name,
                   latency_s=round(time.perf_counter() - start, 3) if start else None,
-                  status=status, evidence_ids=evidence)
+                  status=status, evidence_ids=evidence, **extra)
         return None
 
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
@@ -146,8 +156,11 @@ class TracePlugin(BasePlugin):
         out = sum(r["output_tokens"] for r in responses)
         think = sum(r["thinking_tokens"] for r in responses)
         model = model or next((r["model_version"] for r in responses if r.get("model_version")), None)
+        cached = sum(bool(r.get("cached")) for r in responses)
         return {
-            "model_calls": len(responses),
+            "model_calls": len(responses),  # logical calls the pipeline made
+            "api_calls": len(responses) - cached,  # calls that actually reached Gemini (quota)
+            "cached_calls": cached,  # answered by the response cache
             "tool_calls": sum(r["kind"] == "tool_call" for r in self.records),
             "input_tokens": inp, "output_tokens": out, "thinking_tokens": think,
             "total_tokens": inp + out + think,
@@ -186,7 +199,8 @@ class TracePlugin(BasePlugin):
                 tokens = f"in {r['input_tokens']:,} / out {r['output_tokens']:,}"
                 if r["thinking_tokens"]:
                     tokens += f" / thinking {r['thinking_tokens']:,}"
-                lines.append(f"{t}  {pad}[LLM {calls}] {r['latency_s']}s, {tokens} tokens")
+                timing = "from cache" if r.get("cached") else f"{r['latency_s']}s"
+                lines.append(f"{t}  {pad}[LLM {calls}] {timing}, {tokens} tokens")
                 for th in r["thoughts"]:
                     lines.append(f"{'':10}{pad}    thought: {_clip(th, 220)}")
                 for tx in r["text"]:

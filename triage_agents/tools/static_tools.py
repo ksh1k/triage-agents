@@ -54,6 +54,30 @@ def _file(tool_context: ToolContext):
     return alert.file if alert else None
 
 
+def _ensure_parsed(tool_context: ToolContext) -> dict | None:
+    """The parsed sample (parsing it now if needed), or None if there is no usable sample.
+
+    Lazy parsing lets the model call parse_sample_binary and the analyze_* tools in the
+    same turn without worrying about order, which saves a model call per run.
+    """
+    parsed = tool_context.state.get(PARSED_KEY)
+    if parsed:
+        return parsed
+    f = _file(tool_context)
+    if f is None or not f.sample_path:
+        return None
+    path = resolve_sample_path(f.sample_path)
+    if path is None:
+        return None
+    result = parse_pe(path)
+    if result["status"] != "success":
+        return None
+    parsed = {"path": str(path), "result": result,
+              **{k: result[k] for k in ("sha256", "is_dll", "embedded_signature_present", "sections", "imports")}}
+    tool_context.state[PARSED_KEY] = parsed
+    return parsed
+
+
 def _no_file() -> dict:
     return {"status": "no_file", "message": "This alert has no file metadata, so static analysis does not apply."}
 
@@ -98,14 +122,10 @@ def parse_sample_binary(tool_context: ToolContext) -> dict:
     path = resolve_sample_path(f.sample_path)
     if path is None:
         return error("sample_path is outside the allowed sample folders; refusing to open it")
-    result = parse_pe(path)
-    if result["status"] != "success":
-        return result
-
-    tool_context.state[PARSED_KEY] = {
-        "path": str(path),
-        **{k: result[k] for k in ("sha256", "is_dll", "embedded_signature_present", "sections", "imports")},
-    }
+    parsed = _ensure_parsed(tool_context)
+    if parsed is None:
+        return parse_pe(path)  # returns the parser's error message
+    result = parsed["result"]
     n_functions = sum(len(v) for v in result["imports"].values())
     eid = record(tool_context.state, AGENT, "parse_sample_binary",
                  f"Parsed {result['file_name']} (sha256 {result['sha256']}): "
@@ -139,7 +159,7 @@ def analyze_imports(tool_context: ToolContext) -> dict:
     f = _file(tool_context)
     if f is None:
         return _no_file()
-    parsed = tool_context.state.get(PARSED_KEY)
+    parsed = _ensure_parsed(tool_context)
     imports = parsed["imports"] if parsed else f.imports
     total = sum(len(v) for v in imports.values())
     result = flag_suspicious_apis(imports)
@@ -178,7 +198,7 @@ def analyze_sections(tool_context: ToolContext) -> dict:
     f = _file(tool_context)
     if f is None:
         return _no_file()
-    parsed = tool_context.state.get(PARSED_KEY)
+    parsed = _ensure_parsed(tool_context)
     sections = parsed["sections"] if parsed else [s.model_dump(exclude_none=True) for s in f.sections]
     if not sections:
         return {"status": "no_sections", "message": "No section information available."}
@@ -210,7 +230,7 @@ def analyze_strings(tool_context: ToolContext) -> dict:
     f = _file(tool_context)
     if f is None:
         return _no_file()
-    parsed = tool_context.state.get(PARSED_KEY)
+    parsed = _ensure_parsed(tool_context)
     strings = extract_strings(Path(parsed["path"]).read_bytes()) if parsed else list(f.strings)
     hits = classify_strings(strings)
     state = tool_context.state
