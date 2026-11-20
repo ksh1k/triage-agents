@@ -1,0 +1,77 @@
+{
+ "alert_id": "EVAL-15",
+ "title": "PowerShell downloaded a file from the internet",
+ "source": "EDR",
+ "host": "WS-ENG-30",
+ "description": "Invoke-WebRequest observed in a PowerShell command line.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\dev7"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:05Z",
+   "pid": 4100,
+   "ppid": 2000,
+   "image": "C:\\Users\\dev7\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+   "command_line": "Code.exe",
+   "user": "CORP\\dev7"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:50Z",
+   "pid": 4120,
+   "ppid": 4100,
+   "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+   "command_line": "powershell.exe -Command Invoke-WebRequest https://packages.example/tools/jq-1.8.zip -OutFile C:\\Users\\dev7\\tools\\jq.zip; Expand-Archive C:\\Users\\dev7\\tools\\jq.zip",
+   "user": "CORP\\dev7"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:00:51Z",
+   "pid": 4120,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.30",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 900,
+   "bytes_in": 1200000,
+   "domain": "packages.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:53Z",
+   "pid": 4120,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.30",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 900,
+   "bytes_in": 1200000,
+   "domain": "packages.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:55Z",
+   "pid": 4120,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.30",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 900,
+   "bytes_in": 1200000,
+   "domain": "packages.example"
+  }
+ ],
+ "dns_queries": [
+  {
+   "timestamp": "2026-11-10T14:00:50Z",
+   "query": "packages.example",
+   "response_ips": [
+    "203.0.113.30"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "alert_id": "EVAL-09",
+ "title": "Unsigned executable with packed sections launched from Downloads",
+ "source": "EDR",
+ "host": "WS-ENG-02",
+ "description": "Static metadata collected at execution time.",
+ "file": {
+  "file_name": "injector.exe",
+  "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+  "size_bytes": 167936,
+  "file_type": "PE32+ executable (console)",
+  "signed": false,
+  "imports": {
+   "KERNEL32.dll": [
+    "OpenProcess",
+    "VirtualAllocEx",
+    "WriteProcessMemory",
+    "CreateRemoteThread",
+    "CreateToolhelp32Snapshot",
+    "Process32FirstW",
+    "Process32NextW",
+    "LoadLibraryA",
+    "GetProcAddress"
+   ]
+  },
+  "sections": [
+   {
+    "name": "UPX0",
+    "virtual_size": 122880,
+    "raw_size": 0,
+    "entropy": 0.0
+   },
+   {
+    "name": "UPX1",
+    "virtual_size": 45056,
+    "raw_size": 45056,
+    "entropy": 7.94
+   },
+   {
+    "name": ".rsrc",
+    "virtual_size": 4096,
+    "raw_size": 4096,
+    "entropy": 3.1
+   }
+  ],
+  "strings": [
+   "explorer.exe",
+   "UPX!"
+  ]
+ },
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\dev3"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:15Z",
+   "pid": 7700,
+   "ppid": 2000,
+   "image": "C:\\Users\\dev3\\Downloads\\injector.exe",
+   "command_line": "C:\\Users\\dev3\\Downloads\\injector.exe",
+   "user": "CORP\\dev3"
+  }
+ ]
+}

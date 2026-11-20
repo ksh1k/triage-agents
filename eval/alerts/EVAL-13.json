@@ -1,0 +1,168 @@
+{
+ "alert_id": "EVAL-13",
+ "title": "Regular outbound connections to an external host",
+ "source": "NDR",
+ "host": "SRV-BKP-01",
+ "description": "Connections to the same external IP at a fixed interval.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 800,
+   "ppid": 700,
+   "image": "C:\\Windows\\System32\\services.exe",
+   "command_line": "services.exe",
+   "user": "NT AUTHORITY\\SYSTEM"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:03Z",
+   "pid": 2400,
+   "ppid": 800,
+   "image": "C:\\Program Files\\CorpBackup\\backupagent.exe",
+   "command_line": "\"C:\\Program Files\\CorpBackup\\backupagent.exe\" --service",
+   "user": "NT AUTHORITY\\SYSTEM"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:01:00Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3979001,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:06:00.755653Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 2811327,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:11:01.518616Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 2370823,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:16:01.363999Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 4848765,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:21:01.698769Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3076731,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:26:02.620645Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3091652,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:31:02.355596Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3508023,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:36:03.021800Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3630197,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:41:03.895044Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3953236,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:46:04.018653Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3905911,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:51:04.881846Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3289344,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:56:04.199994Z",
+   "pid": 2400,
+   "src_ip": "10.20.9.5",
+   "dst_ip": "203.0.113.80",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 4123661,
+   "bytes_in": 4000,
+   "domain": "backup.corp-vendor.example"
+  }
+ ],
+ "dns_queries": [
+  {
+   "timestamp": "2026-11-10T14:00:58Z",
+   "query": "backup.corp-vendor.example",
+   "response_ips": [
+    "203.0.113.80"
+   ]
+  }
+ ]
+}

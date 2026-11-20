@@ -1,0 +1,109 @@
+{
+ "alert_id": "EVAL-07",
+ "title": "Burst of failed DNS lookups",
+ "source": "DNS sensor",
+ "host": "WS-ENG-21",
+ "description": "Many lookups for unregistered domains from one host.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\kim"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:02Z",
+   "pid": 9100,
+   "ppid": 2000,
+   "image": "C:\\Users\\kim\\AppData\\Local\\Temp\\updsvc.exe",
+   "command_line": "C:\\Users\\kim\\AppData\\Local\\Temp\\updsvc.exe",
+   "user": "CORP\\kim"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:00:41Z",
+   "pid": 9100,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "198.51.100.77",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 300,
+   "bytes_in": 900,
+   "domain": "z0laait1ambs78b.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:48Z",
+   "pid": 9100,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "198.51.100.77",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 300,
+   "bytes_in": 900,
+   "domain": "z0laait1ambs78b.example"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:55Z",
+   "pid": 9100,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "198.51.100.77",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 300,
+   "bytes_in": 900,
+   "domain": "z0laait1ambs78b.example"
+  }
+ ],
+ "dns_queries": [
+  {
+   "timestamp": "2026-11-10T14:00:05Z",
+   "query": "v683a679th53c.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:08Z",
+   "query": "er1gr2r32p9zxr52g0.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:11Z",
+   "query": "3f34y6la3vtsaw7s3.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:14Z",
+   "query": "d0tiku8m8m812gac.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:17Z",
+   "query": "sc8ocugsuonxlwwu.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:20Z",
+   "query": "5nmcsv6wfveccfea2.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:23Z",
+   "query": "jjyb8vsatf8cs.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:26Z",
+   "query": "ogv1s6tsc0nt8ox.example",
+   "response_ips": []
+  },
+  {
+   "timestamp": "2026-11-10T14:00:40Z",
+   "query": "z0laait1ambs78b.example",
+   "response_ips": [
+    "198.51.100.77"
+   ]
+  }
+ ]
+}

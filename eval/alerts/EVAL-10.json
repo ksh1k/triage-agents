@@ -1,0 +1,181 @@
+{
+ "alert_id": "EVAL-10",
+ "title": "svchost.exe running from an unusual folder",
+ "source": "EDR",
+ "host": "WS-HR-08",
+ "description": "Process with a system binary name outside System32 made network connections.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\rpatel"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:05Z",
+   "pid": 6600,
+   "ppid": 2000,
+   "image": "C:\\Users\\Public\\svchost.exe",
+   "command_line": "svchost.exe -k netsvcs",
+   "user": "CORP\\rpatel"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:00:30Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 614,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:02:32.052066Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 622,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:04:36.330708Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 625,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:06:33.294483Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 629,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:08:28.292594Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 634,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:10:27.503576Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 633,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:12:23.475638Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 621,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:14:22.716650Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 626,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:16:25.462729Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 612,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:18:21.914576Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 610,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:20:25.922086Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 626,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:22:26.040783Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 626,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:24:26.105588Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 627,
+   "bytes_in": 300,
+   "domain": null
+  },
+  {
+   "timestamp": "2026-11-10T14:26:32.065781Z",
+   "pid": 6600,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "203.0.113.99",
+   "dst_port": 8443,
+   "protocol": "tcp",
+   "bytes_out": 633,
+   "bytes_in": 300,
+   "domain": null
+  }
+ ]
+}

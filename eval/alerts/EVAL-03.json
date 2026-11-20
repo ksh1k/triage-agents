@@ -1,0 +1,33 @@
+{
+ "alert_id": "EVAL-03",
+ "title": "Suspicious rundll32 command line on database server",
+ "source": "EDR",
+ "host": "SRV-DB-07",
+ "description": "rundll32 invoked an export of a system DLL with a process ID argument.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 1800,
+   "ppid": 700,
+   "image": "C:\\Windows\\System32\\services.exe",
+   "command_line": "services.exe",
+   "user": "NT AUTHORITY\\SYSTEM"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:40Z",
+   "pid": 4410,
+   "ppid": 1800,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe /c C:\\Windows\\Temp\\run.bat",
+   "user": "CORP\\svc-sql"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:42Z",
+   "pid": 4420,
+   "ppid": 4410,
+   "image": "C:\\Windows\\System32\\rundll32.exe",
+   "command_line": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 624 C:\\Windows\\Temp\\l.dmp full",
+   "user": "CORP\\svc-sql"
+  }
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "alert_id": "EVAL-04",
+ "title": "Multiple defense and recovery commands on file server",
+ "source": "EDR",
+ "host": "SRV-FS-02",
+ "description": "Several administrative commands ran within two minutes.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 900,
+   "ppid": 700,
+   "image": "C:\\Windows\\System32\\services.exe",
+   "command_line": "services.exe",
+   "user": "NT AUTHORITY\\SYSTEM"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:10Z",
+   "pid": 5100,
+   "ppid": 900,
+   "image": "C:\\Windows\\PSEXESVC.exe",
+   "command_line": "PSEXESVC.exe",
+   "user": "NT AUTHORITY\\SYSTEM"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:15Z",
+   "pid": 5200,
+   "ppid": 5100,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe",
+   "user": "CORP\\adm-temp"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:30Z",
+   "pid": 5210,
+   "ppid": 5200,
+   "image": "C:\\Windows\\System32\\vssadmin.exe",
+   "command_line": "vssadmin.exe delete shadows /all /quiet",
+   "user": "CORP\\adm-temp"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:45Z",
+   "pid": 5220,
+   "ppid": 5200,
+   "image": "C:\\Windows\\System32\\wevtutil.exe",
+   "command_line": "wevtutil cl Security",
+   "user": "CORP\\adm-temp"
+  },
+  {
+   "timestamp": "2026-11-10T14:01:00Z",
+   "pid": 5230,
+   "ppid": 5200,
+   "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+   "command_line": "powershell.exe Set-MpPreference -DisableRealtimeMonitoring $true",
+   "user": "CORP\\adm-temp"
+  },
+  {
+   "timestamp": "2026-11-10T14:01:15Z",
+   "pid": 5240,
+   "ppid": 5200,
+   "image": "C:\\Windows\\System32\\bcdedit.exe",
+   "command_line": "bcdedit /set {default} recoveryenabled No",
+   "user": "CORP\\adm-temp"
+  }
+ ]
+}

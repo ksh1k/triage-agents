@@ -1,0 +1,49 @@
+{
+ "alert_id": "EVAL-12",
+ "title": "Discovery commands executed in quick succession",
+ "source": "EDR",
+ "host": "WS-IT-01",
+ "description": "Several account and domain discovery commands within five minutes.",
+ "process_events": [
+  {
+   "timestamp": "2026-11-10T14:00:00Z",
+   "pid": 2000,
+   "ppid": 640,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "CORP\\it-admin"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:10Z",
+   "pid": 3500,
+   "ppid": 2000,
+   "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+   "command_line": "powershell.exe",
+   "user": "CORP\\it-admin"
+  },
+  {
+   "timestamp": "2026-11-10T14:00:30Z",
+   "pid": 3510,
+   "ppid": 3500,
+   "image": "C:\\Windows\\System32\\whoami.exe",
+   "command_line": "whoami /all",
+   "user": "CORP\\it-admin"
+  },
+  {
+   "timestamp": "2026-11-10T14:01:20Z",
+   "pid": 3520,
+   "ppid": 3500,
+   "image": "C:\\Windows\\System32\\net.exe",
+   "command_line": "net group \"domain admins\" /domain",
+   "user": "CORP\\it-admin"
+  },
+  {
+   "timestamp": "2026-11-10T14:02:20Z",
+   "pid": 3530,
+   "ppid": 3500,
+   "image": "C:\\Windows\\System32\\nltest.exe",
+   "command_line": "nltest /dclist:corp",
+   "user": "CORP\\it-admin"
+  }
+ ]
+}

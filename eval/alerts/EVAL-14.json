@@ -1,0 +1,62 @@
+{
+ "alert_id": "EVAL-14",
+ "title": "New ML rule flagged a DLL with injection-capable imports",
+ "source": "EDR",
+ "host": "WS-OPS-12",
+ "description": "Detection on C:\\Windows\\System32\\kernel32.dll loaded by many processes.",
+ "file": {
+  "file_name": "kernel32.dll",
+  "sha256": "38f5d5944213e6af69b95b2c63fae37e141eebc1173b8a03d7c9a4371882b712",
+  "size_bytes": 806912,
+  "file_type": "PE32+ executable (DLL)",
+  "signed": true,
+  "imports": {
+   "ntdll.dll": [
+    "NtQueryInformationProcess",
+    "NtUnmapViewOfSection",
+    "RtlAllocateHeap"
+   ],
+   "KERNELBASE.dll": [
+    "VirtualAllocEx",
+    "WriteProcessMemory",
+    "CreateRemoteThread",
+    "SetThreadContext",
+    "CreateProcessW",
+    "LoadLibraryExW",
+    "GetProcAddress",
+    "IsDebuggerPresent",
+    "RegSetValueExW"
+   ]
+  },
+  "sections": [
+   {
+    "name": ".text",
+    "virtual_size": 520192,
+    "raw_size": 520192,
+    "entropy": 6.26
+   },
+   {
+    "name": ".rdata",
+    "virtual_size": 225280,
+    "raw_size": 225280,
+    "entropy": 5.6
+   },
+   {
+    "name": ".data",
+    "virtual_size": 4096,
+    "raw_size": 4096,
+    "entropy": 1.3
+   },
+   {
+    "name": ".rsrc",
+    "virtual_size": 524288,
+    "raw_size": 524288,
+    "entropy": 1.32
+   }
+  ],
+  "strings": [
+   "KERNEL32.dll",
+   "Microsoft Corporation"
+  ]
+ }
+}
