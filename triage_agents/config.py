@@ -21,9 +21,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # override=False: a real environment variable (e.g. set by Cloud Run) beats .env.
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 
-# Flash-Lite: the cheapest current model with the most free-tier headroom, and
-# the only Flash-family model answering on 2026-11-19 while 3.6/3.7/3.8 Flash
-# returned 503/504 under load. Override with TRIAGE_MODEL.
+# Flash-Lite: the cheapest current model, the only Flash-family model answering
+# on 2026-11-19 while 3.6/3.7/3.8 Flash returned 503/504, and the one with real
+# free-tier headroom: 15 RPM / 500 requests per day, versus 5 RPM / 20 per day
+# for 3.8 Flash. A full triage takes ~20-30 calls, so 20/day would not even
+# cover one eval. Override with TRIAGE_MODEL.
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 MAX_REVISION_ROUNDS = 2  # The Critic may send a draft back at most this many times.
 # Circuit breaker: ADK aborts a run after this many model calls, so a looping

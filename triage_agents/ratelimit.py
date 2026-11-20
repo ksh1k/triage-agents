@@ -1,7 +1,15 @@
 """Client-side rate limiting, so a multi-agent run stays under the free-tier quota.
 
-The Gemini free tier allows 15 requests per minute per project per model for
-gemini-3.5-flash-lite. Measured 2026-11-20: a Supervisor run with two
+Free-tier limits per project and per model, from the AI Studio rate-limit page
+(2026-11-20):
+
+    model                  RPM   TPM    RPD
+    gemini-3.5-flash-lite   15   250K   500   <- our default
+    gemini-3.1-flash-lite   15   250K   500   (a separate bucket)
+    gemini-3.8-flash         5   250K    20   (too few for multi-agent runs)
+    gemini-3.6-flash         5   250K    20
+
+Measured 2026-11-20: a Supervisor run with two
 specialists working in parallel made 15+ calls in ~34 s and got
 `429 RESOURCE_EXHAUSTED` with "retry in 32-41 s". Retrying after the fact is
 slow and can still fail, so we pace requests *before* sending them.
