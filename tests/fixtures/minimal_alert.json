@@ -1,0 +1,33 @@
+{
+  "alert_id": "TEST-0001",
+  "title": "Office document spawned PowerShell with an encoded command",
+  "source": "EDR",
+  "host": "WS-TEST-01",
+  "description": "Synthetic test alert. IPs are from RFC 5737 documentation ranges and domains use .example, so nothing points at a real host.",
+  "file": {
+    "file_name": "invoice_viewer.exe",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+    "size_bytes": 48128,
+    "file_type": "PE32+ executable (GUI)",
+    "signed": false,
+    "imports": {
+      "KERNEL32.dll": ["VirtualAlloc", "GetProcAddress", "LoadLibraryA"],
+      "WININET.dll": ["InternetOpenA", "InternetReadFile"]
+    },
+    "sections": [
+      {"name": ".text", "virtual_size": 20480, "raw_size": 20480, "entropy": 6.1},
+      {"name": ".rsrc", "virtual_size": 24576, "raw_size": 24576, "entropy": 7.9}
+    ],
+    "strings": ["http://update.invalid-cdn.example/a.bin", "Software\\Microsoft\\Windows\\CurrentVersion\\Run"]
+  },
+  "process_events": [
+    {"timestamp": "2026-11-01T14:02:11Z", "pid": 4120, "ppid": 3300, "image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "command_line": "WINWORD.EXE /n invoice.docm", "user": "TEST\\alice"},
+    {"timestamp": "2026-11-01T14:02:15Z", "pid": 5520, "ppid": 4120, "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "command_line": "powershell.exe -nop -w hidden -enc SQBFAFgA", "user": "TEST\\alice"}
+  ],
+  "network_connections": [
+    {"timestamp": "2026-11-01T14:02:20Z", "pid": 5520, "src_ip": "10.0.0.15", "dst_ip": "203.0.113.50", "dst_port": 443, "bytes_out": 512, "bytes_in": 20480, "domain": "update.invalid-cdn.example"}
+  ],
+  "dns_queries": [
+    {"timestamp": "2026-11-01T14:02:19Z", "query": "update.invalid-cdn.example", "response_ips": ["203.0.113.50"]}
+  ]
+}
