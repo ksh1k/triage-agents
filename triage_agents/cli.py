@@ -1,7 +1,7 @@
 """Command-line interface.
 
     triage run examples/alerts/beacon_rundll32.json --trace     # triage one or more alerts
-    triage eval --cache                                         # run the labeled evaluation set
+    triage eval                                                 # run + score the labeled evaluation set
     triage serve --port 8080                                    # start the HTTP API
     triage config                                               # show settings (the API key only as set/missing)
 """
@@ -94,8 +94,9 @@ def main(argv: list[str] | None = None) -> int:
     ev = sub.add_parser("eval", help="run the labeled evaluation set")
     ev.add_argument("--alerts", type=Path, default=Path("eval/alerts"))
     ev.add_argument("--only", nargs="*", help="alert IDs to run (default: all)")
-    ev.add_argument("--cache", action="store_true", help="record/replay model responses")
+    ev.add_argument("--no-cache", action="store_true", help="don't record/replay model responses")
     ev.add_argument("--rescore", action="store_true", help="re-score saved runs without calling any model")
+    ev.add_argument("--force", action="store_true", help="re-run alerts that already have a saved run")
     ev.add_argument("--out", type=Path, default=Path("results"))
     ev.set_defaults(func=_cmd_eval)
 
