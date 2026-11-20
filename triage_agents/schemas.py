@@ -3,7 +3,7 @@
 There are three groups:
 
 1. Input: `AlertBundle`, the security alert we are asked to triage.
-2. Evidence: `Evidence`, one fact produced by a tool, with an ID like "E3".
+2. Evidence: `Evidence`, one fact produced by a tool, with an ID like "SA-3".
 3. Output:
    - `ReportDraft` is what the Report Writer LLM fills in. It cites evidence IDs
      but never contains the evidence text itself.
@@ -12,7 +12,7 @@ There are three groups:
    - `Critique` is the Critic's verdict on a draft.
 
 Pydantic checks the *shape* of the data (types, required fields, allowed
-values). Checks that need context, like "does evidence E7 exist?" or "is
+values). Checks that need context, like "does evidence SA-7 exist?" or "is
 T1055 a real ATT&CK ID?", happen later in the deterministic report checker.
 """
 
@@ -111,7 +111,7 @@ class AlertBundle(_Strict):
 class Evidence(_Strict):
     """One fact a tool observed, e.g. "section .text has entropy 7.9"."""
 
-    id: str  # "E1", "E2", ... assigned by the evidence ledger, not by the LLM
+    id: str  # "SA-1", "LN-2", "TI-1", ... assigned by the evidence ledger, not by the LLM
     source_agent: str  # which specialist's tool produced it
     tool: str
     summary: str

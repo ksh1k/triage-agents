@@ -16,7 +16,7 @@ recommended next steps.
 | Step | What | Status |
 |---|---|---|
 | 1 | Skeleton: project config, secret scanning, shared schemas | done |
-| 2 | Analysis tools (pefile, entropy, logs, beaconing, ATT&CK, SQLite) + tests | planned |
+| 2 | Analysis tools (pefile, entropy, logs, beaconing, ATT&CK, SQLite) + tests | done |
 | 3 | Static Analysis agent (ReAct) + tracing | planned |
 | 4 | Log/Network and Threat Intel agents | planned |
 | 5 | Supervisor (hierarchical delegation) | planned |
@@ -32,6 +32,15 @@ recommended next steps.
 - Nothing is ever executed. Binaries are only parsed statically.
 - API keys live in `.env`, which is gitignored. A pre-commit hook blocks commits
   that contain `.env` files or strings that look like API keys or private keys.
+
+## Data sources
+
+- **MITRE ATT&CK® Enterprise v20.1**: pinned by SHA-256 and reduced to a compact
+  index in `data/attack/` (see `data/attack/NOTICE.md`). Rebuild with
+  `uv run python scripts/fetch_attack.py`.
+- **Past alerts**: a synthetic SQLite history built from `data/past_alerts_seed.json`.
+- **Benign test binaries**: `data/samples/bin/`, compiled from `data/samples/src/` with
+  `uv run python scripts/build_test_bins.py` (Zig's C compiler, a dev dependency).
 
 ## Setup
 
