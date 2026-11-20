@@ -117,6 +117,26 @@ class Evidence(_Strict):
     summary: str
 
 
+# ---------------------------------------------------------------- Specialist output
+
+
+class Finding(_Strict):
+    description: str
+    evidence_ids: list[str]  # IDs returned by this specialist's tools, e.g. ["SA-2", "SA-4"]
+    technique_hints: list[str]  # candidate ATT&CK IDs; the Threat Intel agent confirms them
+    signal: Literal["benign", "weak", "moderate", "strong"]
+
+
+class SpecialistFindings(_Strict):
+    """What each specialist agent hands back to the Supervisor."""
+
+    agent: str
+    summary: str
+    findings: list[Finding]
+    benign_explanations: list[str]  # innocent reasons that could explain what was seen
+    gaps: list[str]  # what the specialist could not check
+
+
 # ---------------------------------------------------------------- 3. Output
 
 

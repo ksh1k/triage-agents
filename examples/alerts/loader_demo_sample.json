@@ -1,0 +1,15 @@
+{
+  "alert_id": "DEMO-STATIC-01",
+  "title": "Unsigned executable from a user's Downloads folder flagged by EDR",
+  "source": "EDR",
+  "host": "WS-DEV-04",
+  "description": "Unsigned executable written to C:\\Users\\dev\\Downloads\\loader_demo.exe and launched by the user. A copy of the file was collected for static analysis.",
+  "file": {
+    "file_name": "loader_demo.exe",
+    "sha256": "f56275f597c07ec56b5d594724bdcbdcee1944341eda5e8d8629afcee3c75e3e",
+    "size_bytes": 73216,
+    "file_type": "PE32+ executable (console)",
+    "signed": false,
+    "sample_path": "data/samples/bin/loader_demo.exe"
+  }
+}
