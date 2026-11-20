@@ -18,7 +18,7 @@ recommended next steps.
 | 1 | Skeleton: project config, secret scanning, shared schemas | done |
 | 2 | Analysis tools (pefile, entropy, logs, beaconing, ATT&CK, SQLite) + tests | done |
 | 3 | Static Analysis agent (ReAct) + tracing | done |
-| 4 | Log/Network and Threat Intel agents | planned |
+| 4 | Log/Network and Threat Intel agents | done |
 | 5 | Supervisor (hierarchical delegation) | planned |
 | 6 | Report Writer + Critic loop (self-reflection) | planned |
 | 7 | CLI, FastAPI `POST /triage`, Dockerfile | planned |
@@ -54,11 +54,17 @@ uv run pytest                             # offline tests (no API calls)
 RUN_LIVE=1 uv run pytest tests/test_live.py   # opt-in: one real Gemini run
 ```
 
-Try the Static Analysis agent on a sample and watch its reason, act, observe loop:
+Run the three specialists in sequence on a synthetic alert and watch each one's
+reason, act, observe loop (they share session state, so Threat Intel builds on
+the others' evidence):
 
 ```bash
-uv run python scripts/demo_static_agent.py examples/alerts/loader_demo_sample.json
+uv run python scripts/demo_specialists.py examples/alerts/beacon_rundll32.json
+uv run python scripts/demo_specialists.py examples/alerts/loader_demo_sample.json --agents static
 ```
+
+Example alerts are synthetic (`scripts/make_example_alerts.py`, seeded): RFC 5737
+documentation IPs, `.example` domains, made-up hashes.
 
 The default model is `gemini-3.5-flash-lite` (set `TRIAGE_MODEL` to change it).
 Every request has a 60 s timeout and retries on 429/5xx, and each run is capped

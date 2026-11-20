@@ -1,0 +1,522 @@
+{
+ "alert_id": "DEMO-LOGNET-01",
+ "title": "Periodic outbound HTTPS from rundll32.exe to an uncategorized host",
+ "source": "NDR+EDR",
+ "host": "WS-FIN-11",
+ "description": "Network sensor flagged repeated HTTPS sessions from WS-FIN-11 to an uncategorized domain. EDR attached the process tree, connections and DNS for the window, plus static metadata of the DLL loaded by rundll32.",
+ "file": {
+  "file_name": "upd.dll",
+  "sha256": "3b76d3abc5835558c440b9343545c88e03cd564a3f45b45c3be6f7ebd1c7f396",
+  "size_bytes": 118784,
+  "file_type": "PE32+ executable (DLL)",
+  "signed": false,
+  "imports": {
+   "KERNEL32.dll": [
+    "VirtualAlloc",
+    "VirtualProtect",
+    "GetProcAddress",
+    "LoadLibraryA",
+    "Sleep",
+    "CreateThread"
+   ],
+   "WINHTTP.dll": [
+    "WinHttpOpen",
+    "WinHttpConnect",
+    "WinHttpOpenRequest",
+    "WinHttpSendRequest",
+    "WinHttpReceiveResponse"
+   ]
+  },
+  "sections": [
+   {
+    "name": ".text",
+    "virtual_size": 61440,
+    "raw_size": 61440,
+    "entropy": 6.31
+   },
+   {
+    "name": ".rdata",
+    "virtual_size": 24576,
+    "raw_size": 24576,
+    "entropy": 5.02
+   },
+   {
+    "name": ".data",
+    "virtual_size": 28672,
+    "raw_size": 28672,
+    "entropy": 7.71
+   }
+  ],
+  "strings": [
+   "cdn-sync.badupdate.example",
+   "/api/v2/poll?id=%s",
+   "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+   "Start",
+   "Global\\upd_mtx_01"
+  ]
+ },
+ "process_events": [
+  {
+   "timestamp": "2026-11-18T13:00:00Z",
+   "pid": 2400,
+   "ppid": 612,
+   "image": "C:\\Windows\\explorer.exe",
+   "command_line": "C:\\Windows\\Explorer.EXE",
+   "user": "FIN\\jdoe"
+  },
+  {
+   "timestamp": "2026-11-18T13:00:35Z",
+   "pid": 6120,
+   "ppid": 2400,
+   "image": "C:\\Windows\\System32\\rundll32.exe",
+   "command_line": "rundll32.exe C:\\Users\\jdoe\\AppData\\Roaming\\Microsoft\\Crypto\\upd.dll,Start",
+   "user": "FIN\\jdoe"
+  },
+  {
+   "timestamp": "2026-11-18T13:06:50Z",
+   "pid": 6400,
+   "ppid": 6120,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe /c whoami /all",
+   "user": "FIN\\jdoe"
+  },
+  {
+   "timestamp": "2026-11-18T13:07:50Z",
+   "pid": 6410,
+   "ppid": 6120,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe /c net group \"domain admins\" /domain",
+   "user": "FIN\\jdoe"
+  },
+  {
+   "timestamp": "2026-11-18T13:09:00Z",
+   "pid": 6420,
+   "ppid": 6120,
+   "image": "C:\\Windows\\System32\\cmd.exe",
+   "command_line": "cmd.exe /c nltest /domain_trusts",
+   "user": "FIN\\jdoe"
+  },
+  {
+   "timestamp": "2026-11-18T13:15:00Z",
+   "pid": 5000,
+   "ppid": 2400,
+   "image": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+   "command_line": "\"chrome.exe\" --profile-directory=Default",
+   "user": "FIN\\jdoe"
+  }
+ ],
+ "network_connections": [
+  {
+   "timestamp": "2026-11-18T13:01:00Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 433,
+   "bytes_in": 229,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:02:00.683853Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 413,
+   "bytes_in": 201,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:02:57.112831Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 409,
+   "bytes_in": 195,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:03:57.883428Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 407,
+   "bytes_in": 204,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:04:53.939593Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 403,
+   "bytes_in": 223,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:05:53.930096Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 435,
+   "bytes_in": 219,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:06:57.733354Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 440,
+   "bytes_in": 185,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:07:57.936964Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 425,
+   "bytes_in": 234,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:08:57.031484Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 413,
+   "bytes_in": 236,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:09:53.953185Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 413,
+   "bytes_in": 208,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:10:56.946444Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 400,
+   "bytes_in": 238,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:11:59.603165Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 428,
+   "bytes_in": 203,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:12:58.737288Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 405,
+   "bytes_in": 202,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:13:56.338273Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 421,
+   "bytes_in": 201,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:14:59.208133Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 438,
+   "bytes_in": 228,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:15:05Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3052,
+   "bytes_in": 191769,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:16:00.572529Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 438,
+   "bytes_in": 201,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:16:42.950385Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 2206,
+   "bytes_in": 186025,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:16:48.999006Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 1539,
+   "bytes_in": 183972,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:16:57.062516Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 407,
+   "bytes_in": 224,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:16:59.310175Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 1204,
+   "bytes_in": 174543,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:17:15.721906Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3391,
+   "bytes_in": 308263,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:17:28.883515Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 1039,
+   "bytes_in": 153166,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:17:47.477199Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 2942,
+   "bytes_in": 142330,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:17:56.071071Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 404,
+   "bytes_in": 195,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:18:12.961600Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 1211,
+   "bytes_in": 128911,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:18:39.925536Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3032,
+   "bytes_in": 76997,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:18:52.596489Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 418,
+   "bytes_in": 182,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:19:24.052039Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3898,
+   "bytes_in": 215794,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:19:56.041647Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 403,
+   "bytes_in": 222,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:20:12.185583Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 2912,
+   "bytes_in": 92942,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:20:53.263605Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 416,
+   "bytes_in": 204,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:21:07.750138Z",
+   "pid": 5000,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "203.0.113.10",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 3447,
+   "bytes_in": 399774,
+   "domain": "news.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:21:53.762719Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 433,
+   "bytes_in": 192,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:22:51.174506Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 438,
+   "bytes_in": 189,
+   "domain": "cdn-sync.badupdate.example"
+  },
+  {
+   "timestamp": "2026-11-18T13:23:48.837041Z",
+   "pid": 6120,
+   "src_ip": "10.20.4.37",
+   "dst_ip": "198.51.100.23",
+   "dst_port": 443,
+   "protocol": "tcp",
+   "bytes_out": 420,
+   "bytes_in": 180,
+   "domain": "cdn-sync.badupdate.example"
+  }
+ ],
+ "dns_queries": [
+  {
+   "timestamp": "2026-11-18T13:00:58Z",
+   "query": "cdn-sync.badupdate.example",
+   "response_ips": [
+    "198.51.100.23"
+   ]
+  },
+  {
+   "timestamp": "2026-11-18T13:15:03Z",
+   "query": "news.example",
+   "response_ips": [
+    "203.0.113.10"
+   ]
+  }
+ ]
+}
