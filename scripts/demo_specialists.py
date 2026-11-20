@@ -65,7 +65,7 @@ def main() -> int:
     parser.add_argument("alert", type=Path)
     parser.add_argument("--agents", default="static,lognet,intel",
                         help="comma-separated, in order: static, lognet, intel")
-    parser.add_argument("--planner", choices=["plan_react", "builtin", "none"], default="plan_react")
+    parser.add_argument("--planner", choices=["none", "plan_react", "builtin"], default="none")
     args = parser.parse_args()
     if not api_key_configured():
         print("GOOGLE_API_KEY is not set (put it in .env).", file=sys.stderr)

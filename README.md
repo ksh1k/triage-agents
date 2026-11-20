@@ -19,7 +19,7 @@ recommended next steps.
 | 2 | Analysis tools (pefile, entropy, logs, beaconing, ATT&CK, SQLite) + tests | done |
 | 3 | Static Analysis agent (ReAct) + tracing | done |
 | 4 | Log/Network and Threat Intel agents | done |
-| 5 | Supervisor (hierarchical delegation) | planned |
+| 5 | Supervisor (hierarchical delegation) | done |
 | 6 | Report Writer + Critic loop (self-reflection) | planned |
 | 7 | CLI, FastAPI `POST /triage`, Dockerfile | planned |
 | 8 | 15-alert evaluation harness + results | planned |
@@ -63,9 +63,21 @@ uv run python scripts/demo_specialists.py examples/alerts/beacon_rundll32.json
 uv run python scripts/demo_specialists.py examples/alerts/loader_demo_sample.json --agents static
 ```
 
+Or let the Supervisor decide: it reads the alert, plans, briefs the relevant
+specialists (in parallel where possible), and merges their results:
+
+```bash
+uv run python scripts/demo_supervisor.py examples/alerts/beacon_rundll32.json examples/alerts/loader_demo_sample.json
+```
+
 Example alerts are synthetic (`scripts/make_example_alerts.py`, seeded): RFC 5737
 documentation IPs, `.example` domains, made-up hashes.
 
 The default model is `gemini-3.5-flash-lite` (set `TRIAGE_MODEL` to change it).
-Every request has a 60 s timeout and retries on 429/5xx, and each run is capped
-at 40 model calls so a looping agent can't drain the free-tier quota.
+Guardrails for running on the free tier:
+
+- A client-side rate limiter keeps the whole team under 14 requests/minute
+  (`TRIAGE_RPM`; the free-tier limit is 15/min per project per model).
+- Every request has a 60 s timeout and retries 429/5xx with backoff.
+- Each run is capped at 40 model calls, so a looping agent can't drain the quota.
+- A failed run returns its partial state and trace instead of crashing.
