@@ -41,7 +41,15 @@ def default_prompt(alert: AlertBundle) -> str:
 
 
 async def run_agent(root_agent, alert: AlertBundle, prompt: str | None = None, *,
-                    live_trace: bool = False, max_llm_calls: int = MAX_LLM_CALLS_PER_RUN) -> RunResult:
+                    live_trace: bool = False, max_llm_calls: int = MAX_LLM_CALLS_PER_RUN,
+                    initial_state: dict[str, Any] | None = None) -> RunResult:
+    """Run one agent on one alert.
+
+    `initial_state` carries results from earlier runs (e.g. evidence and
+    findings from other specialists); "temp:" keys are dropped.
+    """
+    state = {k: v for k, v in (initial_state or {}).items() if not k.startswith("temp:")}
+    state[ALERT_KEY] = alert.model_dump(mode="json")
     trace = TracePlugin(live=live_trace)
     app = App(name=APP_NAME, root_agent=root_agent, plugins=[trace])
     run_config = RunConfig(max_llm_calls=max_llm_calls)
@@ -49,7 +57,7 @@ async def run_agent(root_agent, alert: AlertBundle, prompt: str | None = None, *
     started = time.perf_counter()
     try:
         session = await runner.session_service.create_session(
-            app_name=APP_NAME, user_id=USER_ID, state={ALERT_KEY: alert.model_dump(mode="json")})
+            app_name=APP_NAME, user_id=USER_ID, state=state)
         message = types.Content(role="user", parts=[types.Part(text=prompt or default_prompt(alert))])
         final_text = None
         async for event in runner.run_async(user_id=USER_ID, session_id=session.id,

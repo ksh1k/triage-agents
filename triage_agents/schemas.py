@@ -137,6 +137,19 @@ class SpecialistFindings(_Strict):
     gaps: list[str]  # what the specialist could not check
 
 
+class IntelAssessment(_Strict):
+    """What the Threat Intel specialist hands back: confirmed ATT&CK mappings and history."""
+
+    agent: str
+    summary: str
+    # Each mapping cites the behavior evidence (SA-/LN-) AND the TI- evidence
+    # that confirmed the ID exists in the pinned ATT&CK version.
+    techniques: list["TechniqueMapping"]
+    rejected_hints: list[str]  # hints not supported by evidence, each with the reason
+    history: list[Finding]  # matches against past alerts and how they were resolved
+    gaps: list[str]
+
+
 # ---------------------------------------------------------------- 3. Output
 
 
@@ -170,6 +183,9 @@ class TriageReport(ReportDraft):
 
     evidence: list[Evidence]
     revision_rounds: int = Field(ge=0)
+
+
+IntelAssessment.model_rebuild()  # resolve the forward reference to TechniqueMapping
 
 
 class CriticIssue(_Strict):

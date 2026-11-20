@@ -4,23 +4,17 @@ ReAct = Reason + Act. The model thinks about what to check, calls a tool,
 reads the tool's result, and repeats until it has enough to judge. ADK's
 LlmAgent already runs that loop: each model turn may request tool calls, ADK
 executes them and sends the results back, and the loop ends when the model
-gives a final answer. A planner makes the reasoning part visible:
-
-- PlanReActPlanner asks the model to write explicit PLANNING / REASONING
-  sections before acting (works with any model).
-- BuiltInPlanner uses Gemini's native thinking and returns thought summaries.
+gives a final answer. The planner (see base.py) makes the reasoning visible.
 """
 
 from __future__ import annotations
 
 from google.adk import Agent
 from google.adk.models.base_llm import BaseLlm
-from google.adk.planners import BasePlanner, BuiltInPlanner, PlanReActPlanner
-from google.genai import types
 
-from ..models import make_model
 from ..schemas import SpecialistFindings
 from ..tools.static_tools import STATIC_TOOLS
+from .base import build_specialist
 
 AGENT_NAME = "static_analyst"
 OUTPUT_KEY = "static_findings"
@@ -56,30 +50,9 @@ Finish by returning your findings in the required structured format, with agent 
 static_analyst."""
 
 
-def make_planner(kind: str) -> BasePlanner | None:
-    """'plan_react' (explicit text reasoning), 'builtin' (Gemini thinking summaries), or 'none'."""
-    if kind == "plan_react":
-        return PlanReActPlanner()
-    if kind == "builtin":
-        return BuiltInPlanner(thinking_config=types.ThinkingConfig(include_thoughts=True))
-    if kind == "none":
-        return None
-    raise ValueError(f"unknown planner {kind!r}")
-
-
 def build_static_analyst(model: str | BaseLlm | None = None, *, as_subagent: bool = False,
                          planner: str = "plan_react") -> Agent:
-    kwargs = dict(
-        name=AGENT_NAME,
-        model=make_model(model),  # Gemini with timeout + retries (or a test fake)
-        description=DESCRIPTION,
-        instruction=INSTRUCTION,
-        tools=STATIC_TOOLS,
-        output_schema=SpecialistFindings,  # final answer is validated against this
-        output_key=OUTPUT_KEY,  # ...and saved in session state under this key
-        planner=make_planner(planner),
-    )
-    if as_subagent:
-        # single_turn: run once on the Supervisor's request, return a result, no chatting.
-        kwargs["mode"] = "single_turn"
-    return Agent(**kwargs)
+    return build_specialist(
+        name=AGENT_NAME, description=DESCRIPTION, instruction=INSTRUCTION, tools=STATIC_TOOLS,
+        output_schema=SpecialistFindings, output_key=OUTPUT_KEY,
+        model=model, as_subagent=as_subagent, planner=planner)
