@@ -25,6 +25,7 @@ from google.adk.plugins.base_plugin import BasePlugin
 from .config import estimate_cost_usd
 
 TEXT_LIMIT = 400
+CODE_NODES = {"intake", "check_findings", "check_report", "route_after_critic", "finalize"}
 
 
 def _clip(text: str, limit: int = TEXT_LIMIT) -> str:
@@ -144,6 +145,26 @@ class TracePlugin(BasePlugin):
                   status=status, evidence_ids=evidence, **extra)
         return None
 
+    async def on_event_callback(self, *, invocation_context, event):
+        """Workflow code nodes don't trigger agent callbacks, so read their decisions off the
+        event stream: deterministic check results and routing (REVISE / FINAL / RETRY)."""
+        actions = getattr(event, "actions", None)
+        delta = (getattr(actions, "state_delta", None) or {}) if actions else {}
+        route = getattr(actions, "route", None) if actions else None
+        # Code-node events are authored by the workflow; the node itself is the last segment
+        # of node_info.path, e.g. "triage_pipeline@1/route_after_critic@2".
+        path = getattr(getattr(event, "node_info", None), "path", None) or ""
+        node = path.rsplit("/", 1)[-1].split("@")[0] if "/" in path else event.author
+        run = path.rsplit("@", 1)[-1] if "@" in path else "1"
+        if "check_issues" in delta:
+            issues = delta["check_issues"] or []
+            self._add("check", node, issues=len(issues), kinds=sorted({i.get("kind", "other") for i in issues}))
+        if route is not None:
+            self._add("route", node, route=route, revision_round=delta.get("revision_round"))
+        elif node in CODE_NODES and "check_issues" not in delta and getattr(event, "output", None) is not None:
+            self._add("node", node, run=run)
+        return None
+
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
         self._add("tool_error", tool_context.agent_name, tool=tool.name, error=_clip(repr(error), 300))
         return None
@@ -215,6 +236,14 @@ class TracePlugin(BasePlugin):
                 lines.append(f"{t}  {pad}[TOOL] {r['tool']}: {r['status']}{ev} ({r['latency_s']}s)")
             elif k in ("tool_error", "model_error"):
                 lines.append(f"{t}  {pad}[ERROR] {r.get('tool', 'model')}: {_clip(r['error'], 200)}")
+            elif k == "node":
+                lines.append(f"{t}  {pad}[NODE] {r['agent']} done")
+            elif k == "check":
+                found = f" ({', '.join(r['kinds'])})" if r["issues"] else ""
+                lines.append(f"{t}  {pad}[CHECK] {r['agent']}: {r['issues']} issue(s){found}")
+            elif k == "route":
+                rnd = f" (revision {r['revision_round']})" if r.get("revision_round") else ""
+                lines.append(f"{t}  {pad}[ROUTE] {r['agent']} -> {r['route']}{rnd}")
             elif k == "rate_limit_wait":
                 lines.append(f"{t}  {pad}[WAIT] {r['wait_s']}s to stay under the requests-per-minute limit")
         return "\n".join(lines)

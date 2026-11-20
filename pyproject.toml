@@ -11,6 +11,9 @@ dependencies = [
     "python-dotenv>=1.0",
 ]
 
+[project.scripts]
+triage = "triage_agents.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest>=8",
