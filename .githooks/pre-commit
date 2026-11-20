@@ -1,0 +1,14 @@
+#!/bin/sh
+# Runs before every commit. Blocks the commit if the staged changes contain
+# .env files or strings that look like API keys / private keys.
+# Enable once per clone with:  git config core.hooksPath .githooks
+
+# Try "python" first: on Windows, "python3" can be the Microsoft Store stub.
+for py in python py python3; do
+  if command -v "$py" >/dev/null 2>&1; then
+    exec "$py" scripts/scan_secrets.py --staged
+  fi
+done
+
+echo "pre-commit: Python not found, so secrets could not be scanned. Commit blocked." >&2
+exit 1
