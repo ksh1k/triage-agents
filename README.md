@@ -17,7 +17,7 @@ recommended next steps.
 |---|---|---|
 | 1 | Skeleton: project config, secret scanning, shared schemas | done |
 | 2 | Analysis tools (pefile, entropy, logs, beaconing, ATT&CK, SQLite) + tests | done |
-| 3 | Static Analysis agent (ReAct) + tracing | planned |
+| 3 | Static Analysis agent (ReAct) + tracing | done |
 | 4 | Log/Network and Threat Intel agents | planned |
 | 5 | Supervisor (hierarchical delegation) | planned |
 | 6 | Report Writer + Critic loop (self-reflection) | planned |
@@ -50,5 +50,16 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv sync                                   # create .venv and install dependencies
 cp .env.example .env                      # then paste your Gemini API key into .env
 git config core.hooksPath .githooks       # turn on the secret-scanning pre-commit hook
-uv run pytest                             # run the tests
+uv run pytest                             # offline tests (no API calls)
+RUN_LIVE=1 uv run pytest tests/test_live.py   # opt-in: one real Gemini run
 ```
+
+Try the Static Analysis agent on a sample and watch its reason, act, observe loop:
+
+```bash
+uv run python scripts/demo_static_agent.py examples/alerts/loader_demo_sample.json
+```
+
+The default model is `gemini-3.5-flash-lite` (set `TRIAGE_MODEL` to change it).
+Every request has a 60 s timeout and retries on 429/5xx, and each run is capped
+at 40 model calls so a looping agent can't drain the free-tier quota.
